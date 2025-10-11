@@ -370,7 +370,7 @@ export default function VATPHILAIO() {
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          opacity: 0.1,
+          opacity: 0.5,
           pointerEvents: 'none',
         }}
       >
@@ -385,10 +385,10 @@ export default function VATPHILAIO() {
           fontFamily: 'monospace',
           fontWeight: 'bold',
           fontSize: '0.9rem',
-          opacity: 0.7,
+          opacity: 1,
           }}
         >
-          Jacob Allen - ACCPHL4
+          VATPHIL All In One - v0.2.0
         </div>
       </div>
 
