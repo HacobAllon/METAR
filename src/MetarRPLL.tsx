@@ -65,40 +65,44 @@ export default function VatphilMetar() {
   const boxId = useRef(2);
   const [currentTime, setCurrentTime] = useState(new Date());
 
-  const fetchMetar = async (icao: string, box: Box) => {
+const fetchMetar = async (icao: string, box: Box) => {
+  setBoxes(prev =>
+    prev.map(b => (b.id === box.id ? { ...b, fetching: true } : b))
+  );
+  try {
+    const apiBase = import.meta.env.VITE_API_PROXY;
+    const res = await fetch(`${apiBase}/${icao}`);
+    const data = await res.json();
+    const metarText = typeof data === 'string' ? data : data.raw || '';
+    const parsed = parseMetar(metarText);
+    parsed.raw = metarText || 'No METAR';
+
     setBoxes(prev =>
-      prev.map(b => (b.id === box.id ? { ...b, fetching: true } : b))
+      prev.map(b =>
+        b.id === box.id
+          ? {
+              ...b,
+              metar: parsed,
+              newMetar: b.lastRaw && b.lastRaw !== metarText,
+              lastRaw: metarText,
+              icao,
+              fetching: false,
+            }
+          : b
+      )
     );
-    try {
-      const res = await fetch(`${apiBase}/${icao}`);
-      const data = await res.json();
-      const metarText = typeof data === 'string' ? data : data.raw || '';
-      const parsed = parseMetar(metarText);
-      parsed.raw = metarText || 'No METAR';
-      setBoxes(prev =>
-        prev.map(b =>
-          b.id === box.id
-            ? {
-                ...b,
-                metar: parsed,
-                newMetar: b.lastRaw !== metarText,
-                lastRaw: metarText,
-                icao,
-                fetching: false,
-              }
-            : b
-        )
-      );
-    } catch {
-      setBoxes(prev =>
-        prev.map(b =>
-          b.id === box.id
-            ? { ...b, fetching: false, metar: { raw: 'Failed to fetch' } }
-            : b
-        )
-      );
-    }
-  };
+  } catch (err) {
+    console.error(err);
+    setBoxes(prev =>
+      prev.map(b =>
+        b.id === box.id
+          ? { ...b, fetching: false, metar: { raw: 'Failed to fetch' } }
+          : b
+      )
+    );
+  }
+};
+
 
   useEffect(() => {
     boxes.forEach(box => fetchMetar(box.icao, box));
