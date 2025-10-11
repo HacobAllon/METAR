@@ -14,7 +14,7 @@ import VM2 from './assets/cuecards/RPVM/VM2.png';
 import VM3 from './assets/cuecards/RPVM/VM3.png';
 
 
-type TabType = 'metar' | 'radar' | 'cuecards';
+type TabType = 'metar' | 'radar' | 'cuecards' | 'notams';
 const AIRPORTS: Record<string, string> = {
   RPLL: 'Ninoy Aquino International Airport',
   RP: 'All Airports Philippines',
@@ -206,6 +206,9 @@ export default function VATPHILAIO() {
   const cueCardId = useRef(1);
   const maxZIndex = useRef(200);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [notamSearch, setNotamSearch] = useState('RPHI'); // default ICAO
+  const [notams, setNotams] = useState<Array<{ id: string; text: string; start?: string; end?: string }>>([]);
+  const [notamFetching, setNotamFetching] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showMiniRadar, setShowMiniRadar] = useState(true);
   const [showATC, setShowATC] = useState(true);
@@ -219,6 +222,26 @@ export default function VATPHILAIO() {
       document.exitFullscreen?.();
     }
   };
+const fetchNotams = async (icao: string) => {
+  setNotamFetching(true);
+  try {
+    const url = `https://api.autorouter.aero/v1.0/notam?itemas=${encodeURIComponent(
+      JSON.stringify([icao])
+    )}&offset=0&limit=10`;
+
+    const res = await fetch(url);
+    const data = await res.json();
+
+    // data.rows contains the NOTAMs
+    setNotams(Array.isArray(data.rows) ? data.rows : []);
+  } catch (err) {
+    console.error(err);
+    setNotams([]);
+  } finally {
+    setNotamFetching(false);
+  }
+};
+
 
   // Update fullscreen state
   useEffect(() => {
@@ -368,6 +391,7 @@ useEffect(() => {
     if (e.key === '1') setActiveTab('metar');
     if (e.key === '2') setActiveTab('radar');
     if (e.key === '3') setActiveTab('cuecards');
+    if (e.key === '4') setActiveTab('notams');
   };
   window.addEventListener('keydown', handler);
   return () => window.removeEventListener('keydown', handler);
@@ -545,6 +569,7 @@ useEffect(() => {
     </button>
   </div>
 )}
+
       {/* Background Logo */}
       {activeTab !== 'radar' && (
         <div
@@ -581,7 +606,91 @@ useEffect(() => {
       )}
 
       {renderTime()}
-
+{activeTab === 'notams' && (
+  <div
+    style={{
+      position: 'absolute',
+      top: 60,
+      left: '50%',
+      transform: 'translateX(-50%)',
+      display: 'flex',
+      gap: '0.5rem',
+      zIndex: 10,
+    }}
+  >
+    <input
+      type="text"
+      placeholder="Enter ICAO..."
+      value={notamSearch}
+      onChange={(e) => setNotamSearch(e.target.value.toUpperCase())}
+      style={{
+        padding: '0.5rem',
+        borderRadius: '0.5rem',
+        border: '1px solid #ccc',
+        fontFamily: 'monospace',
+        fontWeight: 'bold',
+      }}
+    />
+    <button
+      onClick={() => fetchNotams(notamSearch)}
+      style={{
+        padding: '0.5rem 1rem',
+        borderRadius: '0.5rem',
+        background: '#4CAF50',
+        color: 'white',
+        fontWeight: 'bold',
+        cursor: 'pointer',
+      }}
+    >
+      Search
+    </button>
+  </div>
+)}
+{activeTab === 'notams' && (
+  <div
+    style={{
+      position: 'absolute',
+      top: 120,
+      left: '50%',
+      transform: 'translateX(-50%)',
+      width: '80%',
+      maxHeight: '70%',
+      overflowY: 'auto',
+      background: 'rgba(0,0,0,0.7)',
+      borderRadius: '1rem',
+      padding: '1rem',
+      color: 'white',
+      fontFamily: 'monospace',
+      zIndex: 5,
+    }}
+  >
+    {notamFetching ? (
+      <div>Loading NOTAMs...</div>
+    ) : notams.length === 0 ? (
+      <div>No NOTAMs found for {notamSearch}</div>
+    ) : (
+      notams.map((n) => (
+        <div
+          key={n.id}
+          style={{
+            marginBottom: '0.75rem',
+            padding: '0.5rem',
+            background: 'rgba(255,255,255,0.1)',
+            borderRadius: '0.5rem',
+          }}
+        >
+          <div style={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>{n.id}</div>
+          <div>{n.text}</div>
+          {n.start && n.end && (
+            <div style={{ fontSize: '0.8rem', opacity: 0.7 }}>
+              {n.start} - {n.end}
+            </div>
+          )}
+        </div>
+      ))
+    )}
+  </div>
+)}
       {/* Settings & Fullscreen */}
       {activeTab !== 'radar' && (
         <>
@@ -750,7 +859,7 @@ useEffect(() => {
         >
           RADAR
         </button>
-
+          
         <button
           onClick={() => setActiveTab('cuecards')}
           style={{
@@ -767,6 +876,21 @@ useEffect(() => {
         >
           CUE CARDS
         </button>
+        <button
+  onClick={() => setActiveTab('notams')}
+  style={{
+    background: activeTab === 'notams' ? 'white' : 'transparent',
+    color: activeTab === 'notams' ? 'black' : 'white',
+    border: '1px solid white',
+    borderRadius: '0.5rem',
+    padding: '0.25rem 1rem',
+    fontFamily: 'monospace',
+    fontWeight: 'bold',
+    cursor: 'pointer',
+  }}
+>
+  NOTAMs
+</button>
       </div>
 
       {/* METAR Boxes */}
