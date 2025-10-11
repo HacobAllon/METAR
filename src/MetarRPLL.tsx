@@ -24,6 +24,10 @@ type Box = {
 
 const AIRPORTS: Record<string, string> = {
   RPLL: 'Ninoy Aquino International Airport',
+  RP: 'Philippines',
+  RPL: 'Luzon All Airports',
+  RPV: 'Visayas All Airports',
+  RPM: 'Mindinao All Airports',
   RPVM: 'Mactan International Airport',
   RPLB: 'Subic Bay International Airport',
   RPMD: 'Francisco Bangoy International Airport',
@@ -109,7 +113,7 @@ export default function VatphilMetar() {
 
     const fetchInterval = setInterval(() => {
       boxes.forEach(box => fetchMetar(box.icao, box));
-    }, 1800000); // 30 minutes
+    }, 300000); // 5 minutes
 
     const timeInterval = setInterval(() => setCurrentTime(new Date()), 1000);
 
