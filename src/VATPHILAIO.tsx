@@ -680,7 +680,7 @@ useEffect(() => {
     marginBottom: '0.5rem',
   }}
 >
-  <span>Show Mini Radar</span>
+  <span>Hi</span>
   <input
     type="checkbox"
     checked={showMiniRadar}
@@ -977,21 +977,6 @@ useEffect(() => {
         }}
         allowFullScreen
       ></iframe>
-{showMiniRadar && (
-  <iframe
-    src="https://map.vatsim.net/"
-    style={{
-      position: 'absolute',
-      bottom: 20,
-      right: 20,
-      width: 300,
-      height: 300,
-      border: '2px solid #ffffff',
-      borderRadius: '10px',
-      opacity: 0.9,
-    }}
-  />
-)}
       {/* Cue Cards Tab */}
       {activeTab === 'cuecards' && (
         <>
