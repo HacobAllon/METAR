@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import logo from ' ./assets/VATPHILLOGO.png';
+import logo from './assets/VATPHILLOGO.png';
 import LL1 from './assets/cuecards/RPLL/LL1.png';
 import LL2 from './assets/cuecards/RPLL/LL2.png';
 import LL3 from './assets/cuecards/RPLL/LL3.png';
@@ -460,255 +460,94 @@ export default function VATPHILAIO() {
                 prev.map(b => (b.id === box.id ? { ...b, newMetar: false } : b))
               )
             }
-            data-testid={`box-metar-${box.id}`}
+            data-testid={`box-${box.id}`}
           >
-            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
-              <input
-                type="text"
-                value={box.icao}
-                maxLength={4}
-                style={{
-                  flex: 1,
-                  padding: '0.25rem',
-                  fontFamily: 'monospace',
-                  fontWeight: 'bold',
-                  borderRadius: '0.25rem',
-                }}
-                onChange={e =>
-                  setBoxes(prev =>
-                    prev.map(b =>
-                      b.id === box.id ? { ...b, icao: e.target.value.toUpperCase() } : b
-                    )
-                  )
-                }
-                onKeyDown={e => {
-                  if (e.key === 'Enter') fetchMetar(box.icao, box);
-                }}
-                data-testid={`input-icao-${box.id}`}
-              />
-              <button
-                onClick={() => fetchMetar(box.icao, box)}
-                style={{
-                  padding: '0.25rem 0.5rem',
-                  borderRadius: '0.25rem',
-                  cursor: 'pointer',
-                  fontWeight: 'bold',
-                }}
-                data-testid={`button-fetch-${box.id}`}
-              >
-                Fetch
-              </button>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span>{AIRPORTS[box.icao]}</span>
               <button
                 onClick={() => removeBox(box.id)}
                 style={{
-                  padding: '0.25rem 0.5rem',
+                  background: 'rgba(0,0,0,0.2)',
+                  border: 'none',
                   borderRadius: '0.25rem',
+                  color: 'white',
                   cursor: 'pointer',
                   fontWeight: 'bold',
+                  padding: '0 0.25rem',
                 }}
                 data-testid={`button-remove-${box.id}`}
               >
-                –
+                ×
               </button>
             </div>
-
-            <div style={{ marginBottom: '0.5rem', fontSize: '0.9rem', color: '#555' }}>
-              {box.icao} - {AIRPORTS[box.icao] || 'Unknown Airport'}
-            </div>
-
-            <div
-              style={{
-                textAlign: 'center',
-                flex: 1,
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-              }}
-            >
-              <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>
-                {box.metar ? getQNH(box.metar).hpa : '—'}
-              </div>
-              <div style={{ fontSize: '1rem', marginBottom: '0.5rem' }}>
-                Wind: {getWind(box.metar)}
-              </div>
-              <div style={{ fontSize: '1rem', marginBottom: '0.5rem' }}>
-                Clouds: {box.metar?.clouds || 'SKC'}
-              </div>
-              {box.fetching && (
-                <div
-                  style={{
-                    marginTop: '0.5rem',
-                    width: 24,
-                    height: 24,
-                    border: '3px solid #ccc',
-                    borderTop: '3px solid #333',
-                    borderRadius: '50%',
-                    animation: 'spin 1s linear infinite',
-                    alignSelf: 'center',
-                  }}
-                ></div>
-              )}
-            </div>
-
-            <div style={{ fontSize: '0.8rem', textAlign: 'center', marginTop: '0.25rem' }}>
-              {box.metar?.raw ? `METAR: ${box.metar.raw}` : 'METAR: N/A'}
+            <div style={{ marginTop: '0.5rem' }}>
+              Wind: {getWind(box.metar)} <br />
+              QNH: {getQNH(box.metar).hpa} {getQNH(box.metar).inhg} <br />
+              Clouds: {box.metar?.clouds ?? '—'} <br />
+              RAW: {box.metar?.raw ?? '—'} <br />
+              {box.fetching && <span style={{ animation: 'spin 1s linear infinite' }}>⏳</span>}
             </div>
 
             <div
               onMouseDown={e => handleResize(e, box.id)}
               style={{
                 position: 'absolute',
-                right: 5,
-                bottom: 5,
-                width: 16,
-                height: 16,
-                cursor: 'se-resize',
-                background: '#ccc',
-                borderRadius: '50%',
+                right: 8,
+                bottom: 8,
+                width: 20,
+                height: 20,
+                cursor: 'nwse-resize',
+                background: '#606060ff',
+                borderRadius: '0 0 0.75rem 0',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'white',
+                fontSize: '12px',
               }}
               data-testid={`handle-resize-${box.id}`}
-            ></div>
+            >
+              ⋰
+            </div>
           </div>
         ))}
 
-      {/* Add / Clear Buttons — only on METAR tab */}
-      {activeTab === 'metar' && (
-        <>
-          <button
-            onClick={addBox}
-            title="Add METAR"
-            style={{
-              position: 'absolute',
-              bottom: 20,
-              left: 20,
-              width: 60,
-              height: 60,
-              borderRadius: '50%',
-              background: 'transparent',
-              color: 'white',
-              border: '1px solid white',
-              fontFamily: 'monospace',
-              fontWeight: 'bold',
-              fontSize: '1.5rem',
-              cursor: 'pointer',
-              zIndex: 10,
-            }}
-            data-testid="button-add-metar"
-          >
-            +
-          </button>
-
-          {boxes.length > 0 && (
-            <button
-              onClick={clearBoxes}
-              title="Remove All"
-              style={{
-                position: 'absolute',
-                bottom: 20,
-                right: 20,
-                width: 60,
-                height: 60,
-                borderRadius: '50%',
-                background: 'transparent',
-                color: 'white',
-                border: '1px solid white',
-                fontFamily: 'monospace',
-                fontWeight: 'bold',
-                fontSize: '1.2rem',
-                cursor: 'pointer',
-                zIndex: 10,
-              }}
-              data-testid="button-clear-all"
-            >
-              -
-            </button>
-          )}
-        </>
-      )}
-
-      {/* Radar iframe */}
-      <iframe
-        title="Philippines Weather Radar"
-        src="https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=default&metricTemp=°C&metricWind=kt&zoom=5&overlay=satellite&product=satellite&level=surface&lat=11.68&lon=121.849&pressure=true"
-        width="100%"
-        height="100%"
-        frameBorder="0"
-        style={{ 
-          border: 'none',
-          display: activeTab === 'radar' ? 'block' : 'none'
-        }}
-        allowFullScreen
-      ></iframe>
-
-      {/* Cue Cards Tab */}
+      {/* Cue Cards */}
       {activeTab === 'cuecards' && (
         <>
-          {/* Control Panel */}
           <div
             style={{
               position: 'absolute',
-              top: 80,
-              left: 20,
-              background: 'white',
-              borderRadius: '1rem',
-              padding: '1rem',
-              boxShadow: '0 4px 24px rgba(0,0,0,0.2)',
-              fontFamily: 'monospace',
-              fontWeight: 'bold',
-              minWidth: 250,
-              zIndex: 100,
+              top: 60,
+              left: 10,
+              display: 'flex',
+              gap: '0.5rem',
+              flexWrap: 'wrap',
+              zIndex: 10,
             }}
           >
-            <div style={{ marginBottom: '1rem', fontSize: '1.2rem' }}>
-              Select Airport
-            </div>
-            <select
-              value={selectedAirport}
-              onChange={(e) => setSelectedAirport(e.target.value as 'RPLL' | 'RPVM' | 'RPHI')}
-              style={{
-                width: '100%',
-                padding: '0.5rem',
-                marginBottom: '1rem',
-                fontFamily: 'monospace',
-                fontWeight: 'bold',
-                borderRadius: '0.5rem',
-                border: '2px solid #ccc',
-                fontSize: '1rem',
-              }}
-              data-testid="select-airport"
-            >
-              <option value="RPHI">RPHI - Manila Control</option>
-              <option value="RPLL">RPLL - Manila</option>
-              <option value="RPVM">RPVM - Mactan-Cebu</option>
-            </select>
-
-            <div style={{ marginBottom: '0.5rem', fontSize: '1rem', color: '#555' }}>
-              Available Cards:
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              {CUE_CARDS_DATA[selectedAirport].map((card, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => addCueCard(card.name, card.image)}
-                  style={{
-                    padding: '0.5rem',
-                    background: '#4CAF50',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '0.5rem',
-                    cursor: 'pointer',
-                    fontFamily: 'monospace',
-                    fontWeight: 'bold',
-                  }}
-                  data-testid={`button-add-card-${idx}`}
-                >
-                  {card.name}
-                </button>
-              ))}
-            </div>
+            {CUE_CARDS_DATA[selectedAirport].map(c => (
+              <button
+                key={c.name}
+                onClick={() => addCueCard(c.name, c.image)}
+                style={{
+                  background: 'rgba(255,255,255,0.2)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '0.5rem',
+                  padding: '0.25rem 0.5rem',
+                  fontFamily: 'monospace',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                }}
+                data-testid={`button-add-cuecard-${c.name}`}
+              >
+                {c.name}
+              </button>
+            ))}
           </div>
 
-          {/* Cue Cards Display - FIXED Z-INDEX AND IMAGE HANDLING */}
+          {/* Cue Cards Display */}
           {cueCards.map(card => (
             <div
               key={card.id}
@@ -726,14 +565,14 @@ export default function VATPHILAIO() {
                 userSelect: 'none',
                 zIndex: card.zIndex,
               }}
-              onMouseDown={(e) => {
+              onMouseDown={e => {
                 if ((e.target as HTMLElement).tagName !== 'IMG') {
                   handleCueCardDrag(e, card.id);
                 }
               }}
               data-testid={`card-cue-${card.id}`}
             >
-              {/* Title Bar - Draggable */}
+              {/* Title Bar */}
               <div
                 style={{
                   padding: '0.75rem 1rem',
@@ -749,7 +588,7 @@ export default function VATPHILAIO() {
                   justifyContent: 'space-between',
                   alignItems: 'center',
                 }}
-                onMouseDown={(e) => handleCueCardDrag(e, card.id)}
+                onMouseDown={e => handleCueCardDrag(e, card.id)}
               >
                 <span>{card.name}</span>
                 <button
@@ -769,32 +608,40 @@ export default function VATPHILAIO() {
                 </button>
               </div>
 
+              {/* Image Container */}
               <div
-  style={{
-    flex: 2,
-    position: 'relative',
-    overflow: 'auto',
-    backgroundColor: '#888888', // changed from transparent to gray
-  }}
->
-  <img
-    src={card.image}
-    alt={card.name}
-    style={{
-      display: 'block',
-      width: '100%',
-      height: 'auto',
-      pointerEvents: 'none',
-      userSelect: 'none',
-    }}
-    draggable={false}
-  />
-</div>
+                style={{
+                  flex: 2,
+                  position: 'relative',
+                  overflow: 'auto',
+                  backgroundColor: '#888888', // Gray background
+                }}
+              >
+                <img
+                  src={card.image}
+                  alt={card.name}
+                  style={{
+                    display: 'block',
+                    width: '100%',
+                    height: 'auto',
+                    pointerEvents: 'none',
+                    userSelect: 'none',
+                  }}
+                  draggable={false}
+                />
+              </div>
 
+              {/* Spinner Animation */}
+              <style>{`
+                @keyframes spin {
+                  0% { transform: rotate(0deg); }
+                  100% { transform: rotate(360deg); }
+                }
+              `}</style>
 
               {/* Resize Handle */}
               <div
-                onMouseDown={(e) => handleCueCardResize(e, card.id)}
+                onMouseDown={e => handleCueCardResize(e, card.id)}
                 style={{
                   position: 'absolute',
                   right: 8,
@@ -819,23 +666,19 @@ export default function VATPHILAIO() {
         </>
       )}
 
-      {/* Footer */}
-      <div
+      {/* VATPHIL Logo */}
+      <a
+        href="https://vatphil.com"
+        target="_blank"
         style={{
-          position: 'fixed',
-          bottom: 20,
-          left: '50%',
-          transform: 'translateX(-50%)',
-          color: 'white',
-          fontFamily: 'monospace',
-          fontWeight: 'bold',
-          fontSize: '0.9rem',
-          opacity: 0.7,
-          zIndex: 1000,
+          position: 'absolute',
+          right: 10,
+          bottom: 10,
+          zIndex: 5,
         }}
       >
-        Jacob Allen - ACCPHL4
-      </div>
+        <img src={logo} alt="VATPHIL Logo" width={120} />
+      </a>
     </div>
   );
 }
