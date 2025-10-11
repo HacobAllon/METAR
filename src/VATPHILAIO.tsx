@@ -7,6 +7,10 @@ import LL4 from './assets/cuecards/RPLL/LL4.png';
 import LL5 from './assets/cuecards/RPLL/LL5.png';
 import MNL1 from './assets/cuecards/RPHI/MNL1.png';
 import MNL2 from './assets/cuecards/RPHI/MNL2.png';
+import LL6 from './assets/cuecards/RPLL/LL6.png';
+import VM1 from './assets/cuecards/RPVM/VM1.png';
+import VM2 from './assets/cuecards/RPVM/VM2.png';
+import VM3 from './assets/cuecards/RPVM/VM3.png';
 
 type TabType = 'metar' | 'radar' | 'cuecards';
 
@@ -393,13 +397,16 @@ export default function VATPHILAIO() {
       { name: 'Go Around Procedures', image: LL3 },
       { name: 'Frequencies', image: LL4 },
       { name: 'Heli Chart', image: LL5 },
+      { name: 'VFR Area Chart', image: LL6 }
     ],
     RPHI: [
       { name: 'Waypoint Restrictions', image: MNL1 },
       { name: 'Sectors', image: MNL2 },
     ],
     RPVM: [
-      { name: 'To be added', image: 'https://via.placeholder.com/600x400/4CAF50/white?text=RPVM+Airport+Diagram' },
+      { name: 'Delivery', image: VM1 },
+      { name: 'Aerodrome Chart', image: VM2 },
+      { name: 'Frequnecies', image: VM3 },
     ],
   };
 
