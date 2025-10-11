@@ -93,7 +93,28 @@ export default function VATPHILAIO() {
   const [cueCards, setCueCards] = useState<CueCard[]>([]);
   const cueCardId = useRef(1);
   const maxZIndex = useRef(200);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
+  // Toggle fullscreen using browser API
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      // Request fullscreen on root element
+      document.documentElement.requestFullscreen?.();
+    } else {
+      document.exitFullscreen?.();
+    }
+  };
+
+  // Update isFullscreen state on fullscreen changes
+  useEffect(() => {
+    const handler = () => {
+      setIsFullscreen(Boolean(document.fullscreenElement));
+    };
+    document.addEventListener('fullscreenchange', handler);
+    return () => document.removeEventListener('fullscreenchange', handler);
+  }, []);
+
+  // METAR fetching
   const fetchMetar = async (icao: string, box: Box) => {
     setBoxes(prev => prev.map(b => (b.id === box.id ? { ...b, fetching: true } : b)));
     try {
@@ -101,7 +122,7 @@ export default function VATPHILAIO() {
       const res = await fetch(`${apiBase}/${icao}`);
       const data = await res.json();
       const metarText = typeof data === 'string' ? data : data.raw || '';
-      const parsed = parseMetar(metarText);
+      const parsed = parseMetar(metarText || '');
       parsed.raw = metarText || 'No METAR';
 
       setBoxes(prev =>
@@ -130,12 +151,13 @@ export default function VATPHILAIO() {
     }
   };
 
+  // On mount: fetch initial METARs, set intervals
   useEffect(() => {
     boxes.forEach(box => fetchMetar(box.icao, box));
 
     const fetchInterval = setInterval(() => {
       boxes.forEach(box => fetchMetar(box.icao, box));
-    }, 300000);
+    }, 300000); // 5 minutes
 
     const timeInterval = setInterval(() => setCurrentTime(new Date()), 1000);
 
@@ -143,8 +165,10 @@ export default function VATPHILAIO() {
       clearInterval(fetchInterval);
       clearInterval(timeInterval);
     };
+    // Intentionally empty deps to mimic previous behavior (runs once)
   }, []);
 
+  // Drag & Resize for METAR boxes
   const handleDrag = (e: React.MouseEvent, id: number) => {
     const startX = e.clientX;
     const startY = e.clientY;
@@ -156,9 +180,7 @@ export default function VATPHILAIO() {
     const onMouseMove = (moveEvent: MouseEvent) => {
       const x = moveEvent.clientX - offsetX;
       const y = moveEvent.clientY - offsetY;
-      setBoxes(prev =>
-        prev.map(b => (b.id === id ? { ...b, dragPos: { x, y } } : b))
-      );
+      setBoxes(prev => prev.map(b => (b.id === id ? { ...b, dragPos: { x, y } } : b)));
     };
 
     const onMouseUp = () => {
@@ -182,9 +204,7 @@ export default function VATPHILAIO() {
     const onMouseMove = (moveEvent: MouseEvent) => {
       const newWidth = Math.max(240, startWidth + (moveEvent.clientX - startX));
       const newHeight = Math.max(200, startHeight + (moveEvent.clientY - startY));
-      setBoxes(prev =>
-        prev.map(b => (b.id === id ? { ...b, size: { width: newWidth, height: newHeight } } : b))
-      );
+      setBoxes(prev => prev.map(b => (b.id === id ? { ...b, size: { width: newWidth, height: newHeight } } : b)));
     };
 
     const onMouseUp = () => {
@@ -287,9 +307,7 @@ export default function VATPHILAIO() {
 
   const bringToFront = (id: number) => {
     maxZIndex.current += 1;
-    setCueCards(prev =>
-      prev.map(c => (c.id === id ? { ...c, zIndex: maxZIndex.current } : c))
-    );
+    setCueCards(prev => prev.map(c => (c.id === id ? { ...c, zIndex: maxZIndex.current } : c)));
   };
 
   const handleCueCardDrag = (e: React.MouseEvent, id: number) => {
@@ -305,9 +323,7 @@ export default function VATPHILAIO() {
     const onMouseMove = (moveEvent: MouseEvent) => {
       const x = moveEvent.clientX - offsetX;
       const y = moveEvent.clientY - offsetY;
-      setCueCards(prev =>
-        prev.map(c => (c.id === id ? { ...c, pos: { x, y } } : c))
-      );
+      setCueCards(prev => prev.map(c => (c.id === id ? { ...c, pos: { x, y } } : c)));
     };
 
     const onMouseUp = () => {
@@ -333,9 +349,7 @@ export default function VATPHILAIO() {
     const onMouseMove = (moveEvent: MouseEvent) => {
       const newWidth = Math.max(300, startWidth + (moveEvent.clientX - startX));
       const newHeight = Math.max(200, startHeight + (moveEvent.clientY - startY));
-      setCueCards(prev =>
-        prev.map(c => (c.id === id ? { ...c, size: { width: newWidth, height: newHeight } } : c))
-      );
+      setCueCards(prev => prev.map(c => (c.id === id ? { ...c, size: { width: newWidth, height: newHeight } } : c)));
     };
 
     const onMouseUp = () => {
@@ -359,44 +373,69 @@ export default function VATPHILAIO() {
         overflow: 'hidden',
       }}
     >
-      {/* Background Logo and Name */}
       {/* Background Logo and Name (hidden on Radar tab) */}
-{activeTab !== 'radar' && (
-  <div
-    style={{
-      position: 'absolute',
-      top: '50%',
-      left: '50%',
-      transform: 'translate(-50%, -50%)',
-      zIndex: 0,
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      opacity: 0.5,
-      pointerEvents: 'none',
-    }}
-  >
-    <img src={logo} alt="VATPHIL Logo" width={400} style={{ marginBottom: '1rem' }} />
-    <div
-      style={{
-        position: 'fixed',
-        top: 300,
-        left: '50%',
-        transform: 'translateX(-50%)',
-        color: 'white',
-        fontFamily: 'monospace',
-        fontWeight: 'bold',
-        fontSize: '0.9rem',
-        opacity: 1,
-      }}
-    >
-      VATPHIL All In One - v0.2.0
-    </div>
-  </div>
-)}
-
+      {activeTab !== 'radar' && (
+        <div
+          style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            zIndex: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            opacity: 0.5,
+            pointerEvents: 'none',
+          }}
+        >
+          <img src={logo} alt="VATPHIL Logo" width={400} style={{ marginBottom: '1rem' }} />
+          <div
+            style={{
+              position: 'fixed',
+              top: 300,
+              left: '50%',
+              transform: 'translateX(-50%)',
+              color: 'white',
+              fontFamily: 'monospace',
+              fontWeight: 'bold',
+              fontSize: '0.9rem',
+              opacity: 1,
+            }}
+          >
+            VATPHIL All In One - v0.2.0
+          </div>
+        </div>
+      )}
 
       {renderTime()}
+
+      {/* Fullscreen Button - hidden on radar tab */}
+      {activeTab !== 'radar' && (
+        <button
+          onClick={toggleFullscreen}
+          title={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
+          style={{
+            position: 'absolute',
+            top: 10,
+            right: 10,
+            width: 40,
+            height: 40,
+            borderRadius: '50%',
+            background: 'transparent',
+            color: 'white',
+            border: '1px solid white',
+            fontFamily: 'monospace',
+            fontWeight: 'bold',
+            fontSize: '1.2rem',
+            cursor: 'pointer',
+            zIndex: 10,
+          }}
+          data-testid="button-fullscreen"
+        >
+          {isFullscreen ? '⤢' : '⤡'}
+        </button>
+      )}
 
       {/* Tab Bar */}
       <div
@@ -493,9 +532,7 @@ export default function VATPHILAIO() {
             }}
             onMouseDown={e => handleDrag(e, box.id)}
             onClick={() =>
-              setBoxes(prev =>
-                prev.map(b => (b.id === box.id ? { ...b, newMetar: false } : b))
-              )
+              setBoxes(prev => prev.map(b => (b.id === box.id ? { ...b, newMetar: false } : b)))
             }
             data-testid={`box-metar-${box.id}`}
           >
@@ -811,7 +848,7 @@ export default function VATPHILAIO() {
                   flex: 2,
                   position: 'relative',
                   overflow: 'auto',
-                  backgroundColor: '#888888', // changed from transparent to gray
+                  backgroundColor: '#888888',
                 }}
               >
                 <img
@@ -827,14 +864,6 @@ export default function VATPHILAIO() {
                   draggable={false}
                 />
               </div>
-
-              {/* Spinner Animation */}
-              <style>{`
-                @keyframes spin {
-                  0% { transform: rotate(0deg); }
-                  100% { transform: rotate(360deg); }
-                }
-              `}</style>
 
               {/* Resize Handle */}
               <div
@@ -863,6 +892,13 @@ export default function VATPHILAIO() {
         </>
       )}
 
+      {/* Spinner animation keyframes */}
+      <style>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 }
