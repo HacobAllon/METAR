@@ -360,37 +360,41 @@ export default function VATPHILAIO() {
       }}
     >
       {/* Background Logo and Name */}
-      <div
-        style={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          zIndex: 0,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          opacity: 0.5,
-          pointerEvents: 'none',
-        }}
-      >
-        <img src={logo} alt="VATPHIL Logo" width={400} style={{ marginBottom: '1rem' }} />
-        <div
-          style={{
-          position: 'fixed',            
-          top: 300,
-          left: '50%',
-          transform: 'translateX(-50%)',
-          color: 'white',
-          fontFamily: 'monospace',
-          fontWeight: 'bold',
-          fontSize: '0.9rem',
-          opacity: 1,
-          }}
-        >
-          VATPHIL All In One - v0.2.0
-        </div>
-      </div>
+      {/* Background Logo and Name (hidden on Radar tab) */}
+{activeTab !== 'radar' && (
+  <div
+    style={{
+      position: 'absolute',
+      top: '50%',
+      left: '50%',
+      transform: 'translate(-50%, -50%)',
+      zIndex: 0,
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      opacity: 0.5,
+      pointerEvents: 'none',
+    }}
+  >
+    <img src={logo} alt="VATPHIL Logo" width={400} style={{ marginBottom: '1rem' }} />
+    <div
+      style={{
+        position: 'fixed',
+        top: 300,
+        left: '50%',
+        transform: 'translateX(-50%)',
+        color: 'white',
+        fontFamily: 'monospace',
+        fontWeight: 'bold',
+        fontSize: '0.9rem',
+        opacity: 1,
+      }}
+    >
+      VATPHIL All In One - v0.2.0
+    </div>
+  </div>
+)}
+
 
       {renderTime()}
 
