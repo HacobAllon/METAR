@@ -68,7 +68,4 @@ Default airport ICAO codes included:
 
 ## Setup Instructions
 
-1. Clone the repository:
-```bash
-git clone <repo-url>
-cd vatphil-metar
+To be added
