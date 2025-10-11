@@ -1,5 +1,14 @@
-import React, { useEffect, useState, useRef } from 'react';
-import logo from './assets/VATPHILLOGO.png';
+import { useEffect, useState, useRef } from 'react';
+import logo from ' ./assets/VATPHILLOGO.png';
+import LL1 from './assets/cuecards/RPLL/LL1.png';
+import LL2 from './assets/cuecards/RPLL/LL2.png';
+import LL3 from './assets/cuecards/RPLL/LL3.png';
+import LL4 from './assets/cuecards/RPLL/LL4.png';
+import LL5 from './assets/cuecards/RPLL/LL5.png';
+import MNL1 from './assets/cuecards/RPHI/MNL1.png';
+import MNL2 from './assets/cuecards/RPHI/MNL2.png';
+
+type TabType = 'metar' | 'radar' | 'cuecards';
 
 type MetarData = {
   qnh_hpa?: number;
@@ -20,6 +29,15 @@ type Box = {
   size: { width: number; height: number };
   lastRaw?: string;
   fetching: boolean;
+};
+
+type CueCard = {
+  id: number;
+  name: string;
+  image: string;
+  pos: { x: number; y: number };
+  size: { width: number; height: number };
+  zIndex: number;
 };
 
 const AIRPORTS: Record<string, string> = {
@@ -56,7 +74,7 @@ function parseMetar(metar: string): MetarData {
   };
 }
 
-export default function VatphilMetar() {
+export default function VATPHILAIO() {
   const [boxes, setBoxes] = useState<Box[]>([
     {
       id: 1,
@@ -70,7 +88,11 @@ export default function VatphilMetar() {
   ]);
   const boxId = useRef(2);
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [activeTab, setActiveTab] = useState<'metar' | 'radar'>('metar');
+  const [activeTab, setActiveTab] = useState<TabType>('metar');
+  const [selectedAirport, setSelectedAirport] = useState<'RPLL' | 'RPVM' | 'RPHI'>('RPLL');
+  const [cueCards, setCueCards] = useState<CueCard[]>([]);
+  const cueCardId = useRef(1);
+  const maxZIndex = useRef(200);
 
   const fetchMetar = async (icao: string, box: Box) => {
     setBoxes(prev => prev.map(b => (b.id === box.id ? { ...b, fetching: true } : b)));
@@ -113,7 +135,7 @@ export default function VatphilMetar() {
 
     const fetchInterval = setInterval(() => {
       boxes.forEach(box => fetchMetar(box.icao, box));
-    }, 300000); // 5 minutes
+    }, 300000);
 
     const timeInterval = setInterval(() => setCurrentTime(new Date()), 1000);
 
@@ -223,6 +245,7 @@ export default function VatphilMetar() {
           borderRadius: '0.5rem',
           fontFamily: 'monospace',
           fontWeight: 'bold',
+          zIndex: 5,
         }}
       >
         Zulu: {zulu} | PH: {phTime}
@@ -231,6 +254,100 @@ export default function VatphilMetar() {
   };
 
   const removeBox = (id: number) => setBoxes(prev => prev.filter(b => b.id !== id));
+
+  const CUE_CARDS_DATA: Record<'RPLL' | 'RPVM' | 'RPHI', Array<{ name: string; image: string }>> = {
+    RPLL: [
+      { name: 'Delivery', image: LL1 },
+      { name: 'VFR', image: LL2 },
+      { name: 'Go Around Procedures', image: LL3 },
+      { name: 'Frequencies', image: LL4 },
+      { name: 'Heli Chart', image: LL5 },
+    ],
+    RPHI: [
+      { name: 'Waypoint Restrictions', image: MNL1 },
+      { name: 'Sectors', image: MNL2 },
+    ],
+    RPVM: [
+      { name: 'To be added', image: 'https://via.placeholder.com/600x400/4CAF50/white?text=RPVM+Airport+Diagram' },
+    ],
+  };
+
+  const addCueCard = (name: string, image: string) => {
+    maxZIndex.current += 1;
+    const newCard: CueCard = {
+      id: cueCardId.current++,
+      name,
+      image,
+      pos: { x: window.innerWidth / 2 - 300, y: window.innerHeight / 2 - 200 },
+      size: { width: 600, height: 400 },
+      zIndex: maxZIndex.current,
+    };
+    setCueCards(prev => [...prev, newCard]);
+  };
+
+  const bringToFront = (id: number) => {
+    maxZIndex.current += 1;
+    setCueCards(prev =>
+      prev.map(c => (c.id === id ? { ...c, zIndex: maxZIndex.current } : c))
+    );
+  };
+
+  const handleCueCardDrag = (e: React.MouseEvent, id: number) => {
+    e.preventDefault();
+    bringToFront(id);
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const card = cueCards.find(c => c.id === id);
+    if (!card) return;
+    const offsetX = startX - card.pos.x;
+    const offsetY = startY - card.pos.y;
+
+    const onMouseMove = (moveEvent: MouseEvent) => {
+      const x = moveEvent.clientX - offsetX;
+      const y = moveEvent.clientY - offsetY;
+      setCueCards(prev =>
+        prev.map(c => (c.id === id ? { ...c, pos: { x, y } } : c))
+      );
+    };
+
+    const onMouseUp = () => {
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+    };
+
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+  };
+
+  const handleCueCardResize = (e: React.MouseEvent, id: number) => {
+    e.stopPropagation();
+    e.preventDefault();
+    bringToFront(id);
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const card = cueCards.find(c => c.id === id);
+    if (!card) return;
+    const startWidth = card.size.width;
+    const startHeight = card.size.height;
+
+    const onMouseMove = (moveEvent: MouseEvent) => {
+      const newWidth = Math.max(300, startWidth + (moveEvent.clientX - startX));
+      const newHeight = Math.max(200, startHeight + (moveEvent.clientY - startY));
+      setCueCards(prev =>
+        prev.map(c => (c.id === id ? { ...c, size: { width: newWidth, height: newHeight } } : c))
+      );
+    };
+
+    const onMouseUp = () => {
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+    };
+
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+  };
+
+  const removeCueCard = (id: number) => setCueCards(prev => prev.filter(c => c.id !== id));
 
   return (
     <div
@@ -271,6 +388,7 @@ export default function VatphilMetar() {
             fontWeight: 'bold',
             cursor: 'pointer',
           }}
+          data-testid="tab-metar"
         >
           METAR
         </button>
@@ -287,8 +405,26 @@ export default function VatphilMetar() {
             fontWeight: 'bold',
             cursor: 'pointer',
           }}
+          data-testid="tab-radar"
         >
           RADAR
+        </button>
+
+        <button
+          onClick={() => setActiveTab('cuecards')}
+          style={{
+            background: activeTab === 'cuecards' ? 'white' : 'transparent',
+            color: activeTab === 'cuecards' ? 'black' : 'white',
+            border: '1px solid white',
+            borderRadius: '0.5rem',
+            padding: '0.25rem 1rem',
+            fontFamily: 'monospace',
+            fontWeight: 'bold',
+            cursor: 'pointer',
+          }}
+          data-testid="tab-cuecards"
+        >
+          CUE CARDS
         </button>
       </div>
 
@@ -316,6 +452,7 @@ export default function VatphilMetar() {
               userSelect: 'none',
               transition: 'background 0.3s',
               overflow: 'hidden',
+              zIndex: 100,
             }}
             onMouseDown={e => handleDrag(e, box.id)}
             onClick={() =>
@@ -323,6 +460,7 @@ export default function VatphilMetar() {
                 prev.map(b => (b.id === box.id ? { ...b, newMetar: false } : b))
               )
             }
+            data-testid={`box-metar-${box.id}`}
           >
             <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
               <input
@@ -346,6 +484,7 @@ export default function VatphilMetar() {
                 onKeyDown={e => {
                   if (e.key === 'Enter') fetchMetar(box.icao, box);
                 }}
+                data-testid={`input-icao-${box.id}`}
               />
               <button
                 onClick={() => fetchMetar(box.icao, box)}
@@ -355,6 +494,7 @@ export default function VatphilMetar() {
                   cursor: 'pointer',
                   fontWeight: 'bold',
                 }}
+                data-testid={`button-fetch-${box.id}`}
               >
                 Fetch
               </button>
@@ -366,6 +506,7 @@ export default function VatphilMetar() {
                   cursor: 'pointer',
                   fontWeight: 'bold',
                 }}
+                data-testid={`button-remove-${box.id}`}
               >
                 –
               </button>
@@ -425,6 +566,7 @@ export default function VatphilMetar() {
                 background: '#ccc',
                 borderRadius: '50%',
               }}
+              data-testid={`handle-resize-${box.id}`}
             ></div>
           </div>
         ))}
@@ -434,6 +576,7 @@ export default function VatphilMetar() {
         <>
           <button
             onClick={addBox}
+            title="Add METAR"
             style={{
               position: 'absolute',
               bottom: 20,
@@ -448,7 +591,9 @@ export default function VatphilMetar() {
               fontWeight: 'bold',
               fontSize: '1.5rem',
               cursor: 'pointer',
+              zIndex: 10,
             }}
+            data-testid="button-add-metar"
           >
             +
           </button>
@@ -456,6 +601,7 @@ export default function VatphilMetar() {
           {boxes.length > 0 && (
             <button
               onClick={clearBoxes}
+              title="Remove All"
               style={{
                 position: 'absolute',
                 bottom: 20,
@@ -470,7 +616,9 @@ export default function VatphilMetar() {
                 fontWeight: 'bold',
                 fontSize: '1.2rem',
                 cursor: 'pointer',
+                zIndex: 10,
               }}
+              data-testid="button-clear-all"
             >
               -
             </button>
@@ -478,29 +626,198 @@ export default function VatphilMetar() {
         </>
       )}
 
-      {/* Logo */}
-      <a
-        href="https://vatphil.com"
-        target="_blank"
-        rel="noopener noreferrer"
-        style={{
-          position: 'fixed',
-          bottom: 40,
-          left: '50%',
-          transform: 'translateX(-50%)',
-          zIndex: 1000,
+      {/* Radar iframe */}
+      <iframe
+        title="Philippines Weather Radar"
+        src="https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=default&metricTemp=°C&metricWind=kt&zoom=5&overlay=satellite&product=satellite&level=surface&lat=11.68&lon=121.849&pressure=true"
+        width="100%"
+        height="100%"
+        frameBorder="0"
+        style={{ 
+          border: 'none',
+          display: activeTab === 'radar' ? 'block' : 'none'
         }}
-      >
-        <img
-          src={logo}
-          alt="VATPHIL Logo"
-          style={{
-            height: 60,
-            opacity: 0.8,
-            cursor: 'pointer',
-          }}
-        />
-      </a>
+        allowFullScreen
+      ></iframe>
+
+      {/* Cue Cards Tab */}
+      {activeTab === 'cuecards' && (
+        <>
+          {/* Control Panel */}
+          <div
+            style={{
+              position: 'absolute',
+              top: 80,
+              left: 20,
+              background: 'white',
+              borderRadius: '1rem',
+              padding: '1rem',
+              boxShadow: '0 4px 24px rgba(0,0,0,0.2)',
+              fontFamily: 'monospace',
+              fontWeight: 'bold',
+              minWidth: 250,
+              zIndex: 100,
+            }}
+          >
+            <div style={{ marginBottom: '1rem', fontSize: '1.2rem' }}>
+              Select Airport
+            </div>
+            <select
+              value={selectedAirport}
+              onChange={(e) => setSelectedAirport(e.target.value as 'RPLL' | 'RPVM' | 'RPHI')}
+              style={{
+                width: '100%',
+                padding: '0.5rem',
+                marginBottom: '1rem',
+                fontFamily: 'monospace',
+                fontWeight: 'bold',
+                borderRadius: '0.5rem',
+                border: '2px solid #ccc',
+                fontSize: '1rem',
+              }}
+              data-testid="select-airport"
+            >
+              <option value="RPHI">RPHI - Manila Control</option>
+              <option value="RPLL">RPLL - Manila</option>
+              <option value="RPVM">RPVM - Mactan-Cebu</option>
+            </select>
+
+            <div style={{ marginBottom: '0.5rem', fontSize: '1rem', color: '#555' }}>
+              Available Cards:
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              {CUE_CARDS_DATA[selectedAirport].map((card, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => addCueCard(card.name, card.image)}
+                  style={{
+                    padding: '0.5rem',
+                    background: '#4CAF50',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '0.5rem',
+                    cursor: 'pointer',
+                    fontFamily: 'monospace',
+                    fontWeight: 'bold',
+                  }}
+                  data-testid={`button-add-card-${idx}`}
+                >
+                  {card.name}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Cue Cards Display - FIXED Z-INDEX AND IMAGE HANDLING */}
+          {cueCards.map(card => (
+            <div
+              key={card.id}
+              style={{
+                position: 'absolute',
+                left: card.pos.x,
+                top: card.pos.y,
+                width: card.size.width,
+                height: card.size.height,
+                background: 'white',
+                borderRadius: '1rem',
+                boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+                display: 'flex',
+                flexDirection: 'column',
+                userSelect: 'none',
+                zIndex: card.zIndex,
+              }}
+              onMouseDown={(e) => {
+                if ((e.target as HTMLElement).tagName !== 'IMG') {
+                  handleCueCardDrag(e, card.id);
+                }
+              }}
+              data-testid={`card-cue-${card.id}`}
+            >
+              {/* Title Bar - Draggable */}
+              <div
+                style={{
+                  padding: '0.75rem 1rem',
+                  background: 'rgba(64, 65, 65, 1)',
+                  color: 'white',
+                  borderTopLeftRadius: '1rem',
+                  borderTopRightRadius: '1rem',
+                  fontFamily: 'monospace',
+                  fontWeight: 'bold',
+                  fontSize: '1rem',
+                  cursor: 'move',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}
+                onMouseDown={(e) => handleCueCardDrag(e, card.id)}
+              >
+                <span>{card.name}</span>
+                <button
+                  onClick={() => removeCueCard(card.id)}
+                  style={{
+                    background: 'rgba(255,255,255,0.2)',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '0.25rem',
+                    padding: '0.25rem 0.5rem',
+                    cursor: 'pointer',
+                    fontWeight: 'bold',
+                  }}
+                  data-testid={`button-remove-card-${card.id}`}
+                >
+                  ×
+                </button>
+              </div>
+
+              <div
+  style={{
+    flex: 2,
+    position: 'relative',
+    overflow: 'auto',
+    backgroundColor: '#888888', // changed from transparent to gray
+  }}
+>
+  <img
+    src={card.image}
+    alt={card.name}
+    style={{
+      display: 'block',
+      width: '100%',
+      height: 'auto',
+      pointerEvents: 'none',
+      userSelect: 'none',
+    }}
+    draggable={false}
+  />
+</div>
+
+
+              {/* Resize Handle */}
+              <div
+                onMouseDown={(e) => handleCueCardResize(e, card.id)}
+                style={{
+                  position: 'absolute',
+                  right: 8,
+                  bottom: 8,
+                  width: 20,
+                  height: 20,
+                  cursor: 'nwse-resize',
+                  background: '#606060ff',
+                  borderRadius: '0 0 0.75rem 0',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'white',
+                  fontSize: '12px',
+                }}
+                data-testid={`handle-resize-card-${card.id}`}
+              >
+                ⋰
+              </div>
+            </div>
+          ))}
+        </>
+      )}
 
       {/* Footer */}
       <div
@@ -519,28 +836,6 @@ export default function VatphilMetar() {
       >
         Jacob Allen - ACCPHL4
       </div>
-
-      {/* Radar iframe */}
-      <iframe
-        title="Philippines Weather Radar"
-        src="https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=default&metricTemp=°C&metricWind=kt&zoom=5&overlay=satellite&product=satellite&level=surface&lat=11.68&lon=121.849&pressure=true"
-        width="100%"
-        height="100%"
-        frameBorder="0"
-        style={{ 
-          border: 'none',
-          display: activeTab === 'radar' ? 'block' : 'none'
-        }}
-        allowFullScreen
-      ></iframe>
-
-      {/* Spinner Animation */}
-      <style>{`
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-      `}</style>
     </div>
   );
 }
