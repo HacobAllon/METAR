@@ -31,6 +31,7 @@ const AIRPORTS: Record<string, string> = {
   RPMZ: 'Zamboanga International Airport',
   RPVD: 'Dumaguete Airport',
   RPLC: 'Clark International Airport',
+  RPMR: 'General Santos International Airport',
 };
 
 function parseMetar(metar: string): MetarData {
