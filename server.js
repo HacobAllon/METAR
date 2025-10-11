@@ -3,7 +3,7 @@ import axios from 'axios';
 import cors from 'cors';
 
 const app = express();
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 
 app.use(cors());
 
@@ -16,6 +16,7 @@ app.get('/metar/:icao', async (req, res) => {
     });
     res.send({ raw: response.data });
   } catch (error) {
+    console.error(error);
     res.status(500).send({ error: error.message });
   }
 });
