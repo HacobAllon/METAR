@@ -1,0 +1,33 @@
+/* General page setup */
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* prevent scrolling */
+  background-color: rgb(38, 40, 41); /* your original gray */
+  font-family: monospace;
+}
+
+/* Make all text unselectable (matches your inline style) */
+* {
+  user-select: none;
+}
+
+/* Optional smooth animations */
+button {
+  transition: background 0.2s, color 0.2s;
+}
+
+/* Optional image centering and scaling for your logo */
+.logo {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0.2; /* subtle transparency */
+  width: 120px;
+  pointer-events: none; /* ignore clicks */
+}
