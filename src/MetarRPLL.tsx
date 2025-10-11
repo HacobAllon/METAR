@@ -429,89 +429,97 @@ export default function VatphilMetar() {
           </div>
         ))}
 
-      {/* Add / Clear Buttons */}
-      <button
-        onClick={addBox}
-        style={{
-          position: 'absolute',
-          bottom: 20,
-          left: 20,
-          width: 60,
-          height: 60,
-          borderRadius: '50%',
-          background: 'transparent',
-          color: 'white',
-          border: '1px solid white',
-          fontFamily: 'monospace',
-          fontWeight: 'bold',
-          fontSize: '1.5rem',
-          cursor: 'pointer',
-        }}
-      >
-        +
-      </button>
+      {/* Add / Clear Buttons — only on METAR tab */}
+      {activeTab === 'metar' && (
+        <>
+          <button
+            onClick={addBox}
+            style={{
+              position: 'absolute',
+              bottom: 20,
+              left: 20,
+              width: 60,
+              height: 60,
+              borderRadius: '50%',
+              background: 'transparent',
+              color: 'white',
+              border: '1px solid white',
+              fontFamily: 'monospace',
+              fontWeight: 'bold',
+              fontSize: '1.5rem',
+              cursor: 'pointer',
+            }}
+          >
+            +
+          </button>
 
-      {boxes.length > 0 && (
-        <button
-          onClick={clearBoxes}
-          style={{
-            position: 'absolute',
-            bottom: 20,
-            right: 20,
-            width: 60,
-            height: 60,
-            borderRadius: '50%',
-            background: 'transparent',
-            color: 'white',
-            border: '1px solid white',
-            fontFamily: 'monospace',
-            fontWeight: 'bold',
-            fontSize: '1.2rem',
-            cursor: 'pointer',
-          }}
-        >
-          -
-        </button>
+          {boxes.length > 0 && (
+            <button
+              onClick={clearBoxes}
+              style={{
+                position: 'absolute',
+                bottom: 20,
+                right: 20,
+                width: 60,
+                height: 60,
+                borderRadius: '50%',
+                background: 'transparent',
+                color: 'white',
+                border: '1px solid white',
+                fontFamily: 'monospace',
+                fontWeight: 'bold',
+                fontSize: '1.2rem',
+                cursor: 'pointer',
+              }}
+            >
+              -
+            </button>
+          )}
+        </>
       )}
 
-{/* logo */}
-<a
-  href="https://vatphil.com"
-  target="_blank"
-  rel="noopener noreferrer"
-  style={{
-    position: 'fixed',   // fixed ensures it's always above other elements
-    bottom: 20,
-    left: '49%',
-    transform: 'translateX(-50%)',
-    zIndex: 1000,       // high z-index so it’s on top
-  }}
->
-  <img
-    src={logo}
-    alt="VATPHIL Logo"
-    style={{
-      height: 60,
-      opacity: 0.8,
-      cursor: 'pointer',
-    }}
-  />
-</a>
-<div
-  style={{
-    position: 'fixed',
-    bottom: 10,
-    left: '44%',
-    color: 'white',
-    fontFamily: 'monospace',
-    fontWeight: 'bold',
-    fontSize: '0.9rem',
-    opacity: 0.7,
-    zIndex: 1000,
-  }}
->
-  Jacob Allen - ACCPHL4
-</div>
+      {/* Logo */}
+      <a
+        href="https://vatphil.com"
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{
+          position: 'fixed',
+          bottom: 40,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          zIndex: 1000,
+        }}
+      >
+        <img
+          src={logo}
+          alt="VATPHIL Logo"
+          style={{
+            height: 60,
+            opacity: 0.8,
+            cursor: 'pointer',
+          }}
+        />
+      </a>
+
+      {/* Footer */}
+      <div
+        style={{
+          position: 'fixed',
+          bottom: 20,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          color: 'white',
+          fontFamily: 'monospace',
+          fontWeight: 'bold',
+          fontSize: '0.9rem',
+          opacity: 0.7,
+          zIndex: 1000,
+        }}
+      >
+        Jacob Allen - ACCPHL4
+      </div>
+
       {/* Radar iframe */}
       {activeTab === 'radar' && (
         <iframe
