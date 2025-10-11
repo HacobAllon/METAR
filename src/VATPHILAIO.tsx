@@ -13,8 +13,8 @@ import VM1 from './assets/cuecards/RPVM/VM1.png';
 import VM2 from './assets/cuecards/RPVM/VM2.png';
 import VM3 from './assets/cuecards/RPVM/VM3.png';
 
-type TabType = 'metar' | 'radar' | 'cuecards';
 
+type TabType = 'metar' | 'radar' | 'cuecards';
 const AIRPORTS: Record<string, string> = {
   RPLL: 'Ninoy Aquino International Airport',
   RP: 'All Airports Philippines',
@@ -207,6 +207,7 @@ export default function VATPHILAIO() {
   const maxZIndex = useRef(200);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showMiniRadar, setShowMiniRadar] = useState(true);
   const [showATC, setShowATC] = useState(true);
   const initialized = useRef(false);
   const closeInfoBox = () => setInfoBoxVisible(false);
@@ -361,7 +362,16 @@ export default function VATPHILAIO() {
     setBoxes(prev => [...prev, newBox]);
     fetchMetar(newBox.icao, newBox);
   };
-
+useEffect(() => {
+  const handler = (e: KeyboardEvent) => {
+    if (e.key === 'm') addBox();
+    if (e.key === '1') setActiveTab('metar');
+    if (e.key === '2') setActiveTab('radar');
+    if (e.key === '3') setActiveTab('cuecards');
+  };
+  window.addEventListener('keydown', handler);
+  return () => window.removeEventListener('keydown', handler);
+}, []);
   const clearBoxes = () => setBoxes([]);
 
   const renderTime = () => {
@@ -662,6 +672,21 @@ export default function VATPHILAIO() {
                   onChange={(e) => setShowATC(e.target.checked)}
                 />
               </label>
+              <div
+  style={{
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: '0.5rem',
+  }}
+>
+  <span>Show Mini Radar</span>
+  <input
+    type="checkbox"
+    checked={showMiniRadar}
+    onChange={() => setShowMiniRadar(prev => !prev)}
+  />
+</div>
 
               <div
                 style={{
@@ -952,7 +977,21 @@ export default function VATPHILAIO() {
         }}
         allowFullScreen
       ></iframe>
-
+{showMiniRadar && (
+  <iframe
+    src="https://map.vatsim.net/"
+    style={{
+      position: 'absolute',
+      bottom: 20,
+      right: 20,
+      width: 300,
+      height: 300,
+      border: '2px solid #ffffff',
+      borderRadius: '10px',
+      opacity: 0.9,
+    }}
+  />
+)}
       {/* Cue Cards Tab */}
       {activeTab === 'cuecards' && (
         <>
