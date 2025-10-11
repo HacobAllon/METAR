@@ -470,20 +470,44 @@ export default function VatphilMetar() {
         </button>
       )}
 
-      {/* logo */}
-      <img
-        src={logo}
-        alt="VATPHIL Logo"
-        style={{
-          position: 'absolute',
-          bottom: 10,
-          left: '50%',
-          transform: 'translateX(-50%)',
-          height: 60,
-          opacity: 0.5,
-        }}
-      />
-
+{/* logo */}
+<a
+  href="https://vatphil.com"
+  target="_blank"
+  rel="noopener noreferrer"
+  style={{
+    position: 'fixed',   // fixed ensures it's always above other elements
+    bottom: 20,
+    left: '49%',
+    transform: 'translateX(-50%)',
+    zIndex: 1000,       // high z-index so it’s on top
+  }}
+>
+  <img
+    src={logo}
+    alt="VATPHIL Logo"
+    style={{
+      height: 60,
+      opacity: 0.8,
+      cursor: 'pointer',
+    }}
+  />
+</a>
+<div
+  style={{
+    position: 'fixed',
+    bottom: 10,
+    left: '44%',
+    color: 'white',
+    fontFamily: 'monospace',
+    fontWeight: 'bold',
+    fontSize: '0.9rem',
+    opacity: 0.7,
+    zIndex: 1000,
+  }}
+>
+  Jacob Allen - ACCPHL4
+</div>
       {/* Radar iframe */}
       {activeTab === 'radar' && (
         <iframe
