@@ -1,5 +1,5 @@
 import React from 'react';
-import MetarRPLL from './VATPHILAIO';
+import VATPHILAIO from './VATPHILAIO';
 import './src/assets/App.css';
 
 function App() {
@@ -9,7 +9,7 @@ function App() {
   return (
     <div>
       <h1>METAR for {airport}</h1>
-      <MetarRPLL />
+      <VATPHILAIO />
     </div>
   );
 }
