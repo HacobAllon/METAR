@@ -5,9 +5,10 @@ import LL2 from './assets/cuecards/RPLL/LL2.png';
 import LL3 from './assets/cuecards/RPLL/LL3.png';
 import LL4 from './assets/cuecards/RPLL/LL4.png';
 import LL5 from './assets/cuecards/RPLL/LL5.png';
+import LL6 from './assets/cuecards/RPLL/LL6.png';
+import LL7 from './assets/cuecards/RPLL/LL7.png';
 import MNL1 from './assets/cuecards/RPHI/MNL1.png';
 import MNL2 from './assets/cuecards/RPHI/MNL2.png';
-import LL6 from './assets/cuecards/RPLL/LL6.png';
 import VM1 from './assets/cuecards/RPVM/VM1.png';
 import VM2 from './assets/cuecards/RPVM/VM2.png';
 import VM3 from './assets/cuecards/RPVM/VM3.png';
@@ -392,11 +393,12 @@ export default function VATPHILAIO() {
 
   const CUE_CARDS_DATA: Record<'RPLL' | 'RPVM' | 'RPHI', Array<{ name: string; image: string }>> = {
     RPLL: [
+      { name: 'Aerodrome Chart', image: LL7 },
       { name: 'Delivery', image: LL1 },
-      { name: 'VFR', image: LL2 },
-      { name: 'Go Around Procedures', image: LL3 },
       { name: 'Frequencies', image: LL4 },
-      { name: 'Heli Chart', image: LL5 },
+      { name: 'Go Around Procedures', image: LL3 },
+      { name: 'VFR Heli Chart', image: LL5 },
+      { name: 'VFR', image: LL2 },
       { name: 'VFR Area Chart', image: LL6 }
     ],
     RPHI: [
@@ -404,8 +406,8 @@ export default function VATPHILAIO() {
       { name: 'Sectors', image: MNL2 },
     ],
     RPVM: [
-      { name: 'Delivery', image: VM1 },
       { name: 'Aerodrome Chart', image: VM2 },
+      { name: 'Delivery', image: VM1 },
       { name: 'Frequnecies', image: VM3 },
     ],
   };
