@@ -550,7 +550,8 @@ useEffect(() => {
     <h1 style={{ fontSize: '2rem', marginBottom: '1rem' }}>Welcome to VATPHIL AIO!</h1>
     <p style={{ marginBottom: '2rem' }}>
       Important updates to sector files will be shown here. Current AIRAC2510
-      - Windy Satellite is currently down
+      - Windy Satellite is currently down.
+      - NOTAMs are UNAVAILABLE.
     </p>
     <button
       onClick={closeInfoBox}
