@@ -398,7 +398,7 @@ export default function VATPHILAIO() {
       { name: 'Frequencies', image: LL4 },
       { name: 'Go Around Procedures', image: LL3 },
       { name: 'VFR Heli Chart', image: LL5 },
-      { name: 'VFR', image: LL2 },
+      { name: 'VFR Circuit', image: LL2 },
       { name: 'VFR Area Chart', image: LL6 }
     ],
     RPHI: [
