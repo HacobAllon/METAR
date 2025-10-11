@@ -521,17 +521,18 @@ export default function VatphilMetar() {
       </div>
 
       {/* Radar iframe */}
-      {activeTab === 'radar' && (
-        <iframe
-          title="Philippines Weather Radar"
-          src="https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=default&metricTemp=°C&metricWind=kt&zoom=5&overlay=satellite&product=satellite&level=surface&lat=11.68&lon=121.849&pressure=true"
-          width="100%"
-          height="100%"
-          frameBorder="0"
-          style={{ border: 'none' }}
-          allowFullScreen
-        ></iframe>
-      )}
+      <iframe
+        title="Philippines Weather Radar"
+        src="https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=default&metricTemp=°C&metricWind=kt&zoom=5&overlay=satellite&product=satellite&level=surface&lat=11.68&lon=121.849&pressure=true"
+        width="100%"
+        height="100%"
+        frameBorder="0"
+        style={{ 
+          border: 'none',
+          display: activeTab === 'radar' ? 'block' : 'none'
+        }}
+        allowFullScreen
+      ></iframe>
 
       {/* Spinner Animation */}
       <style>{`
