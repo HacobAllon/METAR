@@ -520,7 +520,7 @@ export default function VATPHILAIO() {
               opacity: 1,
             }}
           >
-            VATPHIL All In One - v0.2.0
+            VATPHIL All In One - v0.5.0
           </div>
         </div>
       )}
