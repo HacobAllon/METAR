@@ -10,6 +10,24 @@ import MNL2 from './assets/cuecards/RPHI/MNL2.png';
 
 type TabType = 'metar' | 'radar' | 'cuecards';
 
+const AIRPORTS: Record<string, string> = {
+  RPLL: 'Ninoy Aquino International Airport',
+  RP: 'All Airports Philippines',
+  RPL: 'Luzon All Airports',
+  RPV: 'Visayas All Airports',
+  RPM: 'Mindinao All Airports',
+  RPVM: 'Mactan International Airport',
+  RPVP: 'Puerto Princesa International Airport',
+  RPLB: 'Subic Bay International Airport',
+  RPMD: 'Francisco Bangoy International Airport',
+  RPLI: 'Laoag International Airport',
+  RPVK: 'Kalibo International Airport',
+  RPMZ: 'Zamboanga International Airport',
+  RPVD: 'Dumaguete Airport',
+  RPLC: 'Clark International Airport',
+  RPMR: 'General Santos International Airport',
+};
+
 type MetarData = {
   qnh_hpa?: number;
   wind_dir?: number | 'VRB';
@@ -40,23 +58,116 @@ type CueCard = {
   zIndex: number;
 };
 
-const AIRPORTS: Record<string, string> = {
-  RPLL: 'Ninoy Aquino International Airport',
-  RP: 'Philippines',
-  RPL: 'Luzon All Airports',
-  RPV: 'Visayas All Airports',
-  RPM: 'Mindinao All Airports',
-  RPVM: 'Mactan International Airport',
-  RPLB: 'Subic Bay International Airport',
-  RPMD: 'Francisco Bangoy International Airport',
-  RPLI: 'Laoag International Airport',
-  RPVK: 'Kalibo International Airport',
-  RPMZ: 'Zamboanga International Airport',
-  RPVD: 'Dumaguete Airport',
-  RPLC: 'Clark International Airport',
-  RPMR: 'General Santos International Airport',
+// VATPHIL ATC Types
+type Controller = {
+  cid: number;
+  callsign: string;
+  name: string;
+  frequency?: string;
+  facility?: string;
 };
 
+// The VATPHIL ATC component
+function VATPHILATC() {
+  const [controllers, setControllers] = useState<Controller[]>([]);
+  const [dragPos, setDragPos] = useState({ x: window.innerWidth - 240, y: window.innerHeight / 2 - 150 });
+  const [zIndex, setZIndex] = useState(300);
+
+  // Fetch VATSIM controllers
+  useEffect(() => {
+    const fetchControllers = async () => {
+      try {
+        const res = await fetch('https://data.vatsim.net/v3/vatsim-data.json');
+        const data = await res.json();
+        if (!data.controllers) return setControllers([]);
+        const allControllers: Controller[] = Object.values(data.controllers)
+          .map((c: any) => ({
+            cid: c.cid,
+            callsign: c.callsign,
+            frequency: c.frequency,
+            name: c.name,
+            facility: c.facility,
+          }))
+          .filter((c: Controller) => c.callsign && (c.callsign.startsWith('RP') || c.callsign.startsWith('MNL')));
+        setControllers(allControllers);
+      } catch (err) {
+        console.error(err);
+        setControllers([]);
+      }
+    };
+
+    fetchControllers();
+    const interval = setInterval(fetchControllers, 15000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Drag handling
+  const handleDrag = (e: React.MouseEvent) => {
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const startPos = { ...dragPos };
+
+    const onMouseMove = (moveEvent: MouseEvent) => {
+      const x = startPos.x + moveEvent.clientX - startX;
+      const y = startPos.y + moveEvent.clientY - startY;
+      setDragPos({ x, y });
+    };
+
+    const onMouseUp = () => {
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+    };
+
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+  };
+
+  const bringToFront = () => setZIndex(prev => prev + 1);
+
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        top: dragPos.y,
+        left: dragPos.x,
+        width: 220,
+        maxHeight: '60%',
+        background: 'rgba(0,0,0,0.5)',
+        color: 'white',
+        padding: '1rem',
+        borderRadius: '0.75rem',
+        fontFamily: 'monospace',
+        zIndex,
+        overflowY: 'auto',
+        cursor: 'grab',
+      }}
+      onMouseDown={handleDrag}
+    >
+      <div style={{ fontWeight: 'bold', marginBottom: '0.5rem', textAlign: 'center' }}>
+        Active ATC
+      </div>
+      {controllers.length === 0 ? (
+        <div style={{ textAlign: 'center', fontStyle: 'italic' }}>No controllers online</div>
+      ) : (
+        controllers.map(c => (
+          <div
+            key={c.cid}
+            style={{
+              padding: '0.25rem 0',
+              borderBottom: '1px solid rgba(255,255,255,0.2)',
+            }}
+          >
+            <div style={{ fontWeight: 'bold' }}>{c.callsign}</div>
+            <div style={{ fontSize: '0.85rem' }}>{c.name}</div>
+            {c.frequency && <div style={{ fontSize: '0.85rem' }}>{c.frequency} MHz</div>}
+          </div>
+        ))
+      )}
+    </div>
+  );
+}
+
+// Utility function to parse METAR string
 function parseMetar(metar: string): MetarData {
   const qnhMatch = metar.match(/Q(\d{4})/);
   const windMatch = metar.match(/(\d{3}|VRB)(\d{2,3})KT/);
@@ -74,6 +185,7 @@ function parseMetar(metar: string): MetarData {
   };
 }
 
+// Main component
 export default function VATPHILAIO() {
   const [boxes, setBoxes] = useState<Box[]>([
     {
@@ -94,18 +206,20 @@ export default function VATPHILAIO() {
   const cueCardId = useRef(1);
   const maxZIndex = useRef(200);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showATC, setShowATC] = useState(true);
+  const initialized = useRef(false);
 
-  // Toggle fullscreen using browser API
+  // Toggle fullscreen
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
-      // Request fullscreen on root element
       document.documentElement.requestFullscreen?.();
     } else {
       document.exitFullscreen?.();
     }
   };
 
-  // Update isFullscreen state on fullscreen changes
+  // Update fullscreen state
   useEffect(() => {
     const handler = () => {
       setIsFullscreen(Boolean(document.fullscreenElement));
@@ -114,7 +228,7 @@ export default function VATPHILAIO() {
     return () => document.removeEventListener('fullscreenchange', handler);
   }, []);
 
-  // METAR fetching
+  // Fetch METARs
   const fetchMetar = async (icao: string, box: Box) => {
     setBoxes(prev => prev.map(b => (b.id === box.id ? { ...b, fetching: true } : b)));
     try {
@@ -151,13 +265,16 @@ export default function VATPHILAIO() {
     }
   };
 
-  // On mount: fetch initial METARs, set intervals
+  // Initial fetch on mount - only run once
   useEffect(() => {
-    boxes.forEach(box => fetchMetar(box.icao, box));
+    if (!initialized.current) {
+      boxes.forEach(box => fetchMetar(box.icao, box));
+      initialized.current = true;
+    }
 
     const fetchInterval = setInterval(() => {
       boxes.forEach(box => fetchMetar(box.icao, box));
-    }, 300000); // 5 minutes
+    }, 300000); // 5 mins
 
     const timeInterval = setInterval(() => setCurrentTime(new Date()), 1000);
 
@@ -165,10 +282,9 @@ export default function VATPHILAIO() {
       clearInterval(fetchInterval);
       clearInterval(timeInterval);
     };
-    // Intentionally empty deps to mimic previous behavior (runs once)
-  }, []);
+  }, []); // Empty dependency array to run only once
 
-  // Drag & Resize for METAR boxes
+  // Drag & resize handlers for boxes
   const handleDrag = (e: React.MouseEvent, id: number) => {
     const startX = e.clientX;
     const startY = e.clientY;
@@ -305,14 +421,14 @@ export default function VATPHILAIO() {
     setCueCards(prev => [...prev, newCard]);
   };
 
-  const bringToFront = (id: number) => {
+  const bringCueToFront = (id: number) => {
     maxZIndex.current += 1;
     setCueCards(prev => prev.map(c => (c.id === id ? { ...c, zIndex: maxZIndex.current } : c)));
   };
 
   const handleCueCardDrag = (e: React.MouseEvent, id: number) => {
     e.preventDefault();
-    bringToFront(id);
+    bringCueToFront(id);
     const startX = e.clientX;
     const startY = e.clientY;
     const card = cueCards.find(c => c.id === id);
@@ -338,7 +454,7 @@ export default function VATPHILAIO() {
   const handleCueCardResize = (e: React.MouseEvent, id: number) => {
     e.stopPropagation();
     e.preventDefault();
-    bringToFront(id);
+    bringCueToFront(id);
     const startX = e.clientX;
     const startY = e.clientY;
     const card = cueCards.find(c => c.id === id);
@@ -361,8 +477,9 @@ export default function VATPHILAIO() {
     window.addEventListener('mouseup', onMouseUp);
   };
 
-  const removeCueCard = (id: number) => setCueCards(prev => prev.filter(c => c.id !== id));
-
+ const removeCueCard = (id: number) => setCueCards(prev => prev.filter(c => c.id !== id));
+  
+  // Main return
   return (
     <div
       style={{
@@ -410,31 +527,109 @@ export default function VATPHILAIO() {
 
       {renderTime()}
 
-      {/* Fullscreen Button - hidden on radar tab */}
+      {/* Settings & Fullscreen */}
       {activeTab !== 'radar' && (
-        <button
-          onClick={toggleFullscreen}
-          title={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
-          style={{
-            position: 'absolute',
-            top: 10,
-            right: 10,
-            width: 40,
-            height: 40,
-            borderRadius: '50%',
-            background: 'transparent',
-            color: 'white',
-            border: '1px solid white',
-            fontFamily: 'monospace',
-            fontWeight: 'bold',
-            fontSize: '1.2rem',
-            cursor: 'pointer',
-            zIndex: 10,
-          }}
-          data-testid="button-fullscreen"
-        >
-          {isFullscreen ? '⤢' : '⤡'}
-        </button>
+        <>
+          <button
+            onClick={toggleFullscreen}
+            title={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
+            style={{
+              position: 'absolute',
+              top: 10,
+              right: 10,
+              width: 40,
+              height: 40,
+              borderRadius: '50%',
+              background: 'transparent',
+              color: 'white',
+              border: '1px solid white',
+              fontFamily: 'monospace',
+              fontWeight: 'bold',
+              fontSize: '1.2rem',
+              cursor: 'pointer',
+              zIndex: 10,
+            }}
+          >
+            {isFullscreen ? '⤢' : '⤡'}
+          </button>
+
+          <button
+            onClick={() => setShowSettings((prev) => !prev)}
+            title="Settings"
+            style={{
+              position: 'absolute',
+              top: 60,
+              right: 10,
+              width: 40,
+              height: 40,
+              borderRadius: '50%',
+              background: showSettings ? 'white' : 'transparent',
+              color: showSettings ? 'black' : 'white',
+              border: '1px solid white',
+              fontFamily: 'monospace',
+              fontWeight: 'bold',
+              fontSize: '1.2rem',
+              cursor: 'pointer',
+              zIndex: 10,
+            }}
+          >
+            ⚙️
+          </button>
+
+          {showSettings && (
+            <div
+              style={{
+                position: 'absolute',
+                top: 110,
+                right: 10,
+                background: 'rgba(0,0,0,0.85)',
+                border: '1px solid rgba(255,255,255,0.3)',
+                borderRadius: '0.75rem',
+                color: 'white',
+                padding: '1rem',
+                width: 220,
+                fontFamily: 'monospace',
+                zIndex: 100,
+              }}
+            >
+              <div
+                style={{
+                  fontWeight: 'bold',
+                  marginBottom: '0.5rem',
+                  textAlign: 'center',
+                }}
+              >
+                ⚙️ Settings
+              </div>
+
+              <label
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  marginBottom: '0.5rem',
+                }}
+              >
+                <span>Show Live ATC</span>
+                <input
+                  type="checkbox"
+                  checked={showATC}
+                  onChange={(e) => setShowATC(e.target.checked)}
+                />
+              </label>
+
+              <div
+                style={{
+                  textAlign: 'center',
+                  fontSize: '0.8rem',
+                  opacity: 0.6,
+                }}
+              >
+                More settings coming soon...
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       {/* Tab Bar */}
@@ -699,14 +894,13 @@ export default function VATPHILAIO() {
           )}
         </>
       )}
-      
+
       {/* Radar iframe */}
       <iframe
         title="Philippines Weather Radar"
-        src="https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=default&metricTemp=°C&metricWind=kt&zoom=5&overlay=satellite&product=satellite&level=surface&lat=11.68&lon=121.849&pressure=true"
+        src="https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=mm&metricTemp=°C&metricWind=kt&zoom=6&overlay=wind&product=ecmwf&level=surface&lat=11.987&lon=122.165&pressure=true&message=true"
         width="100%"
         height="100%"
-        frameBorder="0"
         style={{ 
           border: 'none',
           display: activeTab === 'radar' ? 'block' : 'none'
@@ -733,9 +927,7 @@ export default function VATPHILAIO() {
               zIndex: 100,
             }}
           >
-            <div style={{ marginBottom: '1rem', fontSize: '1.2rem' }}>
-              Select Airport
-            </div>
+            <div style={{ marginBottom: '1rem', fontSize: '1.2rem' }}>Select Airport</div>
             <select
               value={selectedAirport}
               onChange={(e) => setSelectedAirport(e.target.value as 'RPLL' | 'RPVM' | 'RPHI')}
@@ -899,6 +1091,9 @@ export default function VATPHILAIO() {
           100% { transform: rotate(360deg); }
         }
       `}</style>
+
+      {/* Insert VATPHIL ATC component */}
+      {showATC && <VATPHILATC />}
     </div>
   );
 }
