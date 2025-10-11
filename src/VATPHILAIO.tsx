@@ -58,7 +58,6 @@ type CueCard = {
   zIndex: number;
 };
 
-// VATPHIL ATC Types
 type Controller = {
   cid: number;
   callsign: string;
@@ -67,13 +66,11 @@ type Controller = {
   facility?: string;
 };
 
-// The VATPHIL ATC component
 function VATPHILATC() {
   const [controllers, setControllers] = useState<Controller[]>([]);
   const [dragPos, setDragPos] = useState({ x: window.innerWidth - 240, y: window.innerHeight / 2 - 150 });
   const [zIndex, setZIndex] = useState(300);
 
-  // Fetch VATSIM controllers
   useEffect(() => {
     const fetchControllers = async () => {
       try {
@@ -101,7 +98,6 @@ function VATPHILATC() {
     return () => clearInterval(interval);
   }, []);
 
-  // Drag handling
   const handleDrag = (e: React.MouseEvent) => {
     const startX = e.clientX;
     const startY = e.clientY;
@@ -167,7 +163,6 @@ function VATPHILATC() {
   );
 }
 
-// Utility function to parse METAR string
 function parseMetar(metar: string): MetarData {
   const qnhMatch = metar.match(/Q(\d{4})/);
   const windMatch = metar.match(/(\d{3}|VRB)(\d{2,3})KT/);
@@ -184,7 +179,6 @@ function parseMetar(metar: string): MetarData {
     time: timeMatch ? timeMatch[0] : undefined,
   };
 }
-
 // Main component
 export default function VATPHILAIO() {
   const [boxes, setBoxes] = useState<Box[]>([
@@ -200,6 +194,7 @@ export default function VATPHILAIO() {
   ]);
   const boxId = useRef(2);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [infoBoxVisible, setInfoBoxVisible] = useState(true); // info box
   const [activeTab, setActiveTab] = useState<TabType>('metar');
   const [selectedAirport, setSelectedAirport] = useState<'RPLL' | 'RPVM' | 'RPHI'>('RPLL');
   const [cueCards, setCueCards] = useState<CueCard[]>([]);
@@ -209,7 +204,7 @@ export default function VATPHILAIO() {
   const [showSettings, setShowSettings] = useState(false);
   const [showATC, setShowATC] = useState(true);
   const initialized = useRef(false);
-
+  const closeInfoBox = () => setInfoBoxVisible(false);
   // Toggle fullscreen
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
@@ -478,8 +473,7 @@ export default function VATPHILAIO() {
   };
 
  const removeCueCard = (id: number) => setCueCards(prev => prev.filter(c => c.id !== id));
-  
-  // Main return
+
   return (
     <div
       style={{
@@ -490,7 +484,49 @@ export default function VATPHILAIO() {
         overflow: 'hidden',
       }}
     >
-      {/* Background Logo and Name (hidden on Radar tab) */}
+      {infoBoxVisible && (
+  <div
+    style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      width: '100vw',
+      height: '100vh',
+      background: 'rgba(0,0,0,0.8)',
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center',
+      alignItems: 'center',
+      color: 'white',
+      zIndex: 9999,
+      fontFamily: 'monospace',
+      textAlign: 'center',
+      padding: '2rem',
+    }}
+  >
+    <h1 style={{ fontSize: '2rem', marginBottom: '1rem' }}>Welcome to VATPHIL AIO!</h1>
+    <p style={{ marginBottom: '2rem' }}>
+      Important updates to sector files will be shown here. Current AIRAC2510
+      - Windy Satellite is currently down
+    </p>
+    <button
+      onClick={closeInfoBox}
+      style={{
+        padding: '0.75rem 1.5rem',
+        fontSize: '1rem',
+        fontWeight: 'bold',
+        borderRadius: '0.5rem',
+        border: 'none',
+        cursor: 'pointer',
+        background: '#4CAF50',
+        color: 'white',
+      }}
+    >
+      Continue
+    </button>
+  </div>
+)}
+      {/* Background Logo */}
       {activeTab !== 'radar' && (
         <div
           style={{
