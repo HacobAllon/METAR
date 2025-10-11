@@ -70,7 +70,7 @@ export default function VatphilMetar() {
       prev.map(b => (b.id === box.id ? { ...b, fetching: true } : b))
     );
     try {
-      const res = await fetch(`${apiBase}${icao}`);
+      const res = await fetch(`${apiBase}/${icao}`);
       const data = await res.json();
       const metarText = typeof data === 'string' ? data : data.raw || '';
       const parsed = parseMetar(metarText);
