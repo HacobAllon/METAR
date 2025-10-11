@@ -359,6 +359,39 @@ export default function VATPHILAIO() {
         overflow: 'hidden',
       }}
     >
+      {/* Background Logo and Name */}
+      <div
+        style={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          zIndex: 0,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          opacity: 0.1,
+          pointerEvents: 'none',
+        }}
+      >
+        <img src={logo} alt="VATPHIL Logo" width={400} style={{ marginBottom: '1rem' }} />
+        <div
+          style={{
+          position: 'fixed',            
+          top: 300,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          color: 'white',
+          fontFamily: 'monospace',
+          fontWeight: 'bold',
+          fontSize: '0.9rem',
+          opacity: 0.7,
+          }}
+        >
+          Jacob Allen - ACCPHL4
+        </div>
+      </div>
+
       {renderTime()}
 
       {/* Tab Bar */}
@@ -625,31 +658,7 @@ export default function VATPHILAIO() {
           )}
         </>
       )}
-{/* Logo */}
-<a
-  href="https://vatphil.com"
-  target="_blank"
-  rel="noopener noreferrer"
-  style={{
-    position: 'fixed',
-    bottom: 40,
-    left: '50%',
-    transform: 'translateX(-50%)',
-    zIndex: 1000,
-  }}
->
-  
-  <img
-    src={logo}
-    alt="VATPHIL Logo"
-    style={{
-      height: 60,
-      opacity: 0.8,
-      cursor: 'pointer',
-    }}
-  />
-</a>
-
+      
       {/* Radar iframe */}
       <iframe
         title="Philippines Weather Radar"
@@ -794,34 +803,34 @@ export default function VATPHILAIO() {
               </div>
 
               <div
-  style={{
-    flex: 2,
-    position: 'relative',
-    overflow: 'auto',
-    backgroundColor: '#888888', // changed from transparent to gray
-  }}
->
-  <img
-    src={card.image}
-    alt={card.name}
-    style={{
-      display: 'block',
-      width: '100%',
-      height: 'auto',
-      pointerEvents: 'none',
-      userSelect: 'none',
-    }}
-    draggable={false}
-  />
-</div>
+                style={{
+                  flex: 2,
+                  position: 'relative',
+                  overflow: 'auto',
+                  backgroundColor: '#888888', // changed from transparent to gray
+                }}
+              >
+                <img
+                  src={card.image}
+                  alt={card.name}
+                  style={{
+                    display: 'block',
+                    width: '100%',
+                    height: 'auto',
+                    pointerEvents: 'none',
+                    userSelect: 'none',
+                  }}
+                  draggable={false}
+                />
+              </div>
 
-{/* Spinner Animation */}
-<style>{`
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-`}</style>
+              {/* Spinner Animation */}
+              <style>{`
+                @keyframes spin {
+                  0% { transform: rotate(0deg); }
+                  100% { transform: rotate(360deg); }
+                }
+              `}</style>
 
               {/* Resize Handle */}
               <div
@@ -850,23 +859,6 @@ export default function VATPHILAIO() {
         </>
       )}
 
-      {/* Footer */}
-      <div
-        style={{
-          position: 'fixed',
-          bottom: 20,
-          left: '50%',
-          transform: 'translateX(-50%)',
-          color: 'white',
-          fontFamily: 'monospace',
-          fontWeight: 'bold',
-          fontSize: '0.9rem',
-          opacity: 0.7,
-          zIndex: 1000,
-        }}
-      >
-        Jacob Allen - ACCPHL4
-      </div>
     </div>
   );
 }
