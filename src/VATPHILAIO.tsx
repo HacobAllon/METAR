@@ -13,6 +13,8 @@ import VM1 from './assets/cuecards/RPVM/VM1.png';
 import VM2 from './assets/cuecards/RPVM/VM2.png';
 import VM3 from './assets/cuecards/RPVM/VM3.png';
 import { localNotams } from './notamsData';
+import { NotamMessage, localNotams as notams } from './notamsData';
+
 
 type TabType = 'metar' | 'radar' | 'cuecards' | 'notams';
 const AIRPORTS: Record<string, string> = {
@@ -207,7 +209,7 @@ export default function VATPHILAIO() {
   const maxZIndex = useRef(200);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [notams, setNotams] = useState(localNotams);
-  const [selectedICAO, setSelectedICAO] = useState('RPHI');
+  const [selectedICAO, setSelectedICAO] = useState('VATPHIL');
   const [showSettings, setShowSettings] = useState(false);
   const [showMiniRadar, setShowMiniRadar] = useState(true);
   const [showATC, setShowATC] = useState(true);
@@ -602,13 +604,15 @@ useEffect(() => {
         padding: '1rem',
         marginBottom: '1rem',
         textAlign: 'center',
-              height: '0'
-      }}>Select Aerodrome</h2>
+        height: '0'
+    }}>
+      Select Aerodrome
+    </h2>
 
     <div
       style={{
         display: 'flex',
-        justifyContent: 'center', // centers horizontally
+        justifyContent: 'center',
         marginBottom: '1rem',
       }}
     >
@@ -616,14 +620,14 @@ useEffect(() => {
         value={selectedICAO}
         onChange={(e) => setSelectedICAO(e.target.value)}
         style={{
-                width: '10%',
-                padding: '0.5rem',
-                marginBottom: '1rem',
-                fontFamily: 'monospace',
-                fontWeight: 'bold',
-                borderRadius: '0.5rem',
-                border: '2px solid #ccc',
-                fontSize: '1rem',
+          width: '10%',
+          padding: '0.5rem',
+          marginBottom: '1rem',
+          fontFamily: 'monospace',
+          fontWeight: 'bold',
+          borderRadius: '0.5rem',
+          border: '2px solid #ccc',
+          fontSize: '1rem',
         }}
       >
         <option value="VATPHIL">VATPHIL</option>
@@ -634,25 +638,28 @@ useEffect(() => {
     </div>
 
     {notams
-  .filter((n) => n.icao === selectedICAO)
-  .map((n) => (
-    <div
-      key={n.id}
-      style={{
-        background: '#222',
-        border: '1px solid #00ff9c',
-        borderRadius: '8px',
-        padding: '1rem',
-        marginBottom: '1rem',
-      }}
-    >
-      <strong>{n.icao}</strong>
-      <p>{n.message}</p>
-      <em>{`Valid from ${n.start} to ${n.end}`}</em>
-    </div>
-  ))}
+      .filter((n) => n.icao === selectedICAO)
+      .map((n) => (
+        <div
+          key={n.id}
+          style={{
+            background: '#222',
+            border: '1px solid #00ff9c',
+            borderRadius: '8px',
+            padding: '1rem',
+            marginBottom: '1rem',
+          }}
+        >
+          <strong>{n.icao}</strong>
+          <p>
+            <NotamMessage message={n.message} />
+          </p>
+          <em>{`Valid from ${n.start} to ${n.end}`}</em>
+        </div>
+      ))}
   </div>
 )}
+
       {/* Settings & Fullscreen */}
       {activeTab !== 'radar' && (
         <>
@@ -751,7 +758,7 @@ useEffect(() => {
     marginBottom: '0.5rem',
   }}
 >
-  <span>Hi</span>
+  <span>made by hacob</span>
   <input
     type="checkbox"
     checked={showMiniRadar}
