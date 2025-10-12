@@ -764,19 +764,31 @@ useEffect(() => {
   />
 </div>
 
-              <div
-                style={{
-                  textAlign: 'center',
-                  fontSize: '0.8rem',
-                  opacity: 0.6,
-                }}
-              >
-                More settings coming soon...
-              </div>
-            </div>
-          )}
-        </>
-      )}
+<div
+  style={{
+    textAlign: 'center',
+    fontSize: '0.8rem',
+    opacity: 0.6,
+  }}
+>
+  <a
+    href="https://discord.com/channels/275064722678743042/1312782960474460242"
+    target="_blank"
+    rel="noopener noreferrer"
+    style={{
+      color: 'lightblue',
+      textDecoration: 'underline',
+      fontWeight: 'bold',
+    }}
+  >
+    Support
+  </a>
+</div>
+</div>
+)}
+</>
+)}
+
 
       {/* Tab Bar */}
       <div
