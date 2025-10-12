@@ -602,7 +602,8 @@ useEffect(() => {
         padding: '1rem',
         marginBottom: '1rem',
         textAlign: 'center',
-      }}>NOTAMs</h2>
+              height: '0'
+      }}>Select Aerodrome</h2>
 
     <div
       style={{
@@ -615,11 +616,14 @@ useEffect(() => {
         value={selectedICAO}
         onChange={(e) => setSelectedICAO(e.target.value)}
         style={{
-          background: 'black',
-          color: 'white',
-          border: '1px solid white',
-          padding: '0.25rem 0.5rem',
-          borderRadius: '0.25rem',
+                width: '10%',
+                padding: '0.5rem',
+                marginBottom: '1rem',
+                fontFamily: 'monospace',
+                fontWeight: 'bold',
+                borderRadius: '0.5rem',
+                border: '2px solid #ccc',
+                fontSize: '1rem',
         }}
       >
         <option value="VATPHIL">VATPHIL</option>
