@@ -147,7 +147,7 @@ function VATPHILATC() {
       onMouseDown={handleDrag}
     >
       <div style={{ fontWeight: 'bold', marginBottom: '0.5rem', textAlign: 'center' }}>
-        Active ATC
+        Active Controllers
       </div>
       {controllers.length === 0 ? (
         <div style={{ textAlign: 'center', fontStyle: 'italic' }}>No controllers online</div>
@@ -528,11 +528,9 @@ useEffect(() => {
       padding: '2rem',
     }}
   >
-    <h1 style={{ fontSize: '2rem', marginBottom: '1rem' }}>Welcome to VATPHIL AIO!</h1>
+    <h1 style={{ fontSize: '5rem', marginBottom: '1rem' }}>Welcome to VATPHIL AIO!</h1>
     <p style={{ marginBottom: '2rem' }}>
-      Important updates to sector files will be shown here. Current AIRAC2510
-      - Windy Satellite is currently down.
-      - NOTAMs are UNAVAILABLE.
+      Important updates will be shown here. Current AIRAC2510.
     </p>
     <button
       onClick={closeInfoBox}
@@ -543,7 +541,7 @@ useEffect(() => {
         borderRadius: '0.5rem',
         border: 'none',
         cursor: 'pointer',
-        background: '#4CAF50',
+        background: '#4caf4f',
         color: 'white',
       }}
     >
