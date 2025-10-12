@@ -12,7 +12,7 @@ import MNL2 from './assets/cuecards/RPHI/MNL2.png';
 import VM1 from './assets/cuecards/RPVM/VM1.png';
 import VM2 from './assets/cuecards/RPVM/VM2.png';
 import VM3 from './assets/cuecards/RPVM/VM3.png';
-
+import { localNotams } from './notamsData';
 
 type TabType = 'metar' | 'radar' | 'cuecards' | 'notams';
 const AIRPORTS: Record<string, string> = {
@@ -206,9 +206,8 @@ export default function VATPHILAIO() {
   const cueCardId = useRef(1);
   const maxZIndex = useRef(200);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [notamSearch, setNotamSearch] = useState('RPHI'); // default ICAO
-  const [notams, setNotams] = useState<Array<{ id: string; text: string; start?: string; end?: string }>>([]);
-  const [notamFetching, setNotamFetching] = useState(false);
+  const [notams, setNotams] = useState(localNotams);
+  const [selectedICAO, setSelectedICAO] = useState('RPHI');
   const [showSettings, setShowSettings] = useState(false);
   const [showMiniRadar, setShowMiniRadar] = useState(true);
   const [showATC, setShowATC] = useState(true);
@@ -222,26 +221,6 @@ export default function VATPHILAIO() {
       document.exitFullscreen?.();
     }
   };
-const fetchNotams = async (icao: string) => {
-  setNotamFetching(true);
-  try {
-    const url = `https://api.autorouter.aero/v1.0/notam?itemas=${encodeURIComponent(
-      JSON.stringify([icao])
-    )}&offset=0&limit=10`;
-
-    const res = await fetch(url);
-    const data = await res.json();
-
-    // data.rows contains the NOTAMs
-    setNotams(Array.isArray(data.rows) ? data.rows : []);
-  } catch (err) {
-    console.error(err);
-    setNotams([]);
-  } finally {
-    setNotamFetching(false);
-  }
-};
-
 
   // Update fullscreen state
   useEffect(() => {
@@ -607,89 +586,70 @@ useEffect(() => {
       )}
 
       {renderTime()}
+
+      
 {activeTab === 'notams' && (
   <div
     style={{
-      position: 'absolute',
-      top: 60,
-      left: '50%',
-      transform: 'translateX(-50%)',
-      display: 'flex',
-      gap: '0.5rem',
-      zIndex: 10,
-    }}
-  >
-    <input
-      type="text"
-      placeholder="Enter ICAO..."
-      value={notamSearch}
-      onChange={(e) => setNotamSearch(e.target.value.toUpperCase())}
-      style={{
-        padding: '0.5rem',
-        borderRadius: '0.5rem',
-        border: '1px solid #ccc',
-        fontFamily: 'monospace',
-        fontWeight: 'bold',
-      }}
-    />
-    <button
-      onClick={() => fetchNotams(notamSearch)}
-      style={{
-        padding: '0.5rem 1rem',
-        borderRadius: '0.5rem',
-        background: '#4CAF50',
-        color: 'white',
-        fontWeight: 'bold',
-        cursor: 'pointer',
-      }}
-    >
-      Search
-    </button>
-  </div>
-)}
-{activeTab === 'notams' && (
-  <div
-    style={{
-      position: 'absolute',
-      top: 120,
-      left: '50%',
-      transform: 'translateX(-50%)',
-      width: '80%',
-      maxHeight: '70%',
-      overflowY: 'auto',
-      background: 'rgba(0,0,0,0.7)',
-      borderRadius: '1rem',
-      padding: '1rem',
+      padding: '2rem',
       color: 'white',
       fontFamily: 'monospace',
-      zIndex: 5,
+      overflowY: 'auto',
+      height: 'calc(100vh - 120px)',
     }}
   >
-    {notamFetching ? (
-      <div>Loading NOTAMs...</div>
-    ) : notams.length === 0 ? (
-      <div>No NOTAMs found for {notamSearch}</div>
-    ) : (
-      notams.map((n) => (
-        <div
-          key={n.id}
-          style={{
-            marginBottom: '0.75rem',
-            padding: '0.5rem',
-            background: 'rgba(255,255,255,0.1)',
-            borderRadius: '0.5rem',
-          }}
-        >
-          <div style={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>{n.id}</div>
-          <div>{n.text}</div>
-          {n.start && n.end && (
-            <div style={{ fontSize: '0.8rem', opacity: 0.7 }}>
-              {n.start} - {n.end}
-            </div>
-          )}
-        </div>
-      ))
-    )}
+    <h2 style={{ 
+        background: '#222',
+        border: '1px solid #00ff9c',
+        borderRadius: '10px',
+        padding: '1rem',
+        marginBottom: '1rem',
+        textAlign: 'center',
+      }}>NOTAMs</h2>
+
+    <div
+      style={{
+        display: 'flex',
+        justifyContent: 'center', // centers horizontally
+        marginBottom: '1rem',
+      }}
+    >
+      <select
+        value={selectedICAO}
+        onChange={(e) => setSelectedICAO(e.target.value)}
+        style={{
+          background: 'black',
+          color: 'white',
+          border: '1px solid white',
+          padding: '0.25rem 0.5rem',
+          borderRadius: '0.25rem',
+        }}
+      >
+        <option value="VATPHIL">VATPHIL</option>
+        <option value="RPHI">RPHI</option>
+        <option value="RPLL">RPLL (Manila)</option>
+        <option value="RPVM">RPVM (Cebu)</option>
+      </select>
+    </div>
+
+    {notams
+  .filter((n) => n.icao === selectedICAO)
+  .map((n) => (
+    <div
+      key={n.id}
+      style={{
+        background: '#222',
+        border: '1px solid #00ff9c',
+        borderRadius: '8px',
+        padding: '1rem',
+        marginBottom: '1rem',
+      }}
+    >
+      <strong>{n.icao}</strong>
+      <p>{n.message}</p>
+      <em>{`Valid from ${n.start} to ${n.end}`}</em>
+    </div>
+  ))}
   </div>
 )}
       {/* Settings & Fullscreen */}
