@@ -599,9 +599,6 @@ useEffect(() => {
     }}
   >
     <h2 style={{ 
-        background: '#222',
-        border: '1px solid #00ff9c',
-        borderRadius: '10px',
         padding: '1rem',
         marginBottom: '1rem',
         textAlign: 'center',
