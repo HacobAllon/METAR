@@ -580,7 +580,7 @@ useEffect(() => {
               opacity: 1,
             }}
           >
-            VATPHIL All In One - v0.5.5
+            VATPHIL All In One - v0.5.9
           </div>
         </div>
       )}
