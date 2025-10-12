@@ -954,9 +954,18 @@ useEffect(() => {
               </button>
             </div>
 
-            <div style={{ marginBottom: '0.5rem', fontSize: '0.9rem', color: '#555' }}>
-              {box.icao} - {AIRPORTS[box.icao] || 'Unknown Airport'}
-            </div>
+            <div
+  style={{
+    marginBottom: '0.5rem',
+    fontSize: '1rem',
+    fontWeight: 'bold',
+    color: box.newMetar ? 'white' : 'black', // contrast with red/white
+  }}
+>
+  {box.icao} - {AIRPORTS[box.icao] || 'Unknown Airport'}
+</div>
+
+
 
             <div
               style={{
