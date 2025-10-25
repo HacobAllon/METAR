@@ -530,7 +530,7 @@ useEffect(() => {
   >
     <h1 style={{ fontSize: '5rem', marginBottom: '1rem' }}>Welcome to VATPHIL AIO!</h1>
     <p style={{ marginBottom: '2rem' }}>
-      Current AIRAC Cycle: 2510 | Next Cycle: 30th Nov 2025
+      Current AIRAC Cycle: 2510 | Next Cycle: 30th October 2025
     </p>
     <button
       onClick={closeInfoBox}
