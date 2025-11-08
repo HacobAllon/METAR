@@ -17,6 +17,22 @@ export const localNotams = [
     start: '2025-11-03 0400Z',
     end: '2025-11-28 0400Z',
   },
+  {
+    id: 1,
+    icao: 'RPVM',
+    message:
+      'SUN-FRI 1930-0930 TWY G1 AND A4 CLOSED DUE WORK IN PROGRESS',
+    start: '2025-11-2 1930Z',
+    end: '2025-11-22 0930Z',
+  },
+   {
+    id: 2,
+    icao: 'RPVM',
+    message:
+      '1830-1930 RAPID EXIT TAXIWAY R1 CLOSED DUE WORK IN PROGRESS',
+    start: '2025-10-28 0635Z',
+    end: '2026-1-27 1930Z',
+  },
 ];
 
 // Define props type
