@@ -6,9 +6,17 @@ export const localNotams = [
     id: 1,
     icao: 'RPLL',
     message:
-      '',
-    start: '',
-    end: '',
+      'IAP ILS OR LOC Runway 24 SUSPENDED DUE ILS Category I Runway 24 Out of Service REF AIP RPLL AD CHART 2-94. Expiration estimated. RPLLYNYX B6268/25',
+    start: '2025-12-11',
+    end: '2025-12-15',
+  },
+   {
+    id: 2,
+    icao: 'RPLL',
+    message:
+      'IAP ILS OR LOC Runway 24 SUSPENDED DUE ILS Category I Runway 24 Out of Service REF AIP RPLL AD CHART 2-94. Expiration estimated. RPLLYNYX B6268/25',
+    start: '2025-12-11',
+    end: '2025-12-15',
   },
   {
     id: 2,
