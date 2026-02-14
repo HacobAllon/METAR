@@ -1022,7 +1022,7 @@ useEffect(() => {
           </div>
         ))}
 
-      {/* Add / Clear Buttons — only on METAR tab */}
+      {/**/}
       {activeTab === 'metar' && (
         <>
           <button
@@ -1077,7 +1077,7 @@ useEffect(() => {
         </>
       )}
 
-      {/* Radar iframe */}
+      {/* Radar*/}
       <iframe
         title="Philippines Weather Radar"
         src="https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=mm&metricTemp=°C&metricWind=kt&zoom=6&overlay=wind&product=ecmwf&level=surface&lat=11.987&lon=122.165&pressure=true&message=true"
@@ -1155,7 +1155,7 @@ useEffect(() => {
             </div>
           </div>
 
-          {/* Cue Cards Display - FIXED Z-INDEX AND IMAGE HANDLING */}
+          {/* Cue Cards*/}
           {cueCards.map(card => (
             <div
               key={card.id}
@@ -1180,7 +1180,7 @@ useEffect(() => {
               }}
               data-testid={`card-cue-${card.id}`}
             >
-              {/* Title Bar - Draggable */}
+              {/*Title Bar*/}
               <div
                 style={{
                   padding: '0.75rem 1rem',
@@ -1238,7 +1238,7 @@ useEffect(() => {
                 />
               </div>
 
-              {/* Resize Handle */}
+              {/**/}
               <div
                 onMouseDown={(e) => handleCueCardResize(e, card.id)}
                 style={{
@@ -1265,7 +1265,7 @@ useEffect(() => {
         </>
       )}
 
-      {/* Spinner animation keyframes */}
+      {/* animation*/}
       <style>{`
         @keyframes spin {
           0% { transform: rotate(0deg); }
@@ -1273,7 +1273,7 @@ useEffect(() => {
         }
       `}</style>
 
-      {/* Insert VATPHIL ATC component */}
+      {/**/}
       {showATC && <VATPHILATC />}
     </div>
   );
